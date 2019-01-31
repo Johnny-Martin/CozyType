@@ -411,6 +411,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\base\GATT.c</FilePath>
             </File>
+            <File>
+              <FileName>Services.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\Services.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4733,6 +4738,11 @@
               <FileName>GATT.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\base\GATT.c</FilePath>
+            </File>
+            <File>
+              <FileName>Services.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\Services.c</FilePath>
             </File>
           </Files>
         </Group>

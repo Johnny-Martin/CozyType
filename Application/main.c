@@ -91,6 +91,7 @@
 #include "base\\DeviceInfo.h"
 #include "base\\GAP.h"
 #include "base\\GATT.h"
+#include "base\\Services.h"
 
 #define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
 
@@ -1326,12 +1327,12 @@ static void ble_stack_init(void)
 
 
 /**@brief Function for the Event Scheduler initialization.
- */
+
 static void scheduler_init(void)
 {
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 }
-
+ */
 
 /**@brief Function for handling events from the BSP module.
  *
@@ -1478,17 +1479,6 @@ static void buttons_leds_init(bool * p_erase_bonds)
     APP_ERROR_CHECK(err_code);
 
     *p_erase_bonds = (startup_event == BSP_EVENT_CLEAR_BONDING_DATA);
-}
-
-
-/**@brief Function for initializing the nrf log module.
- */
-static void log_init(void)
-{
-    ret_code_t err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
 /**@brief Function for handling the idle state (main loop).
