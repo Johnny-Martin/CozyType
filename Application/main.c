@@ -90,6 +90,7 @@
 #include "base\\Battery.h"
 #include "base\\DeviceInfo.h"
 #include "base\\GAP.h"
+#include "base\\GATT.h"
 
 #define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
 
@@ -214,7 +215,7 @@ BLE_HIDS_DEF(m_hids,                                                /**< Structu
              INPUT_REPORT_KEYS_MAX_LEN,
              OUTPUT_REPORT_MAX_LEN);
 BLE_BAS_DEF(m_bas);                                                 /**< Structure used to identify the battery service. */
-NRF_BLE_GATT_DEF(m_gatt);                                           /**< GATT module instance. */
+//NRF_BLE_GATT_DEF(m_gatt);                                           /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                             /**< Context for the Queued Write module.*/
 BLE_ADVERTISING_DEF(m_advertising);                                 /**< Advertising module instance. */
 
@@ -557,13 +558,13 @@ static void timers_init(void)
 }
 
 /**@brief Function for initializing the GATT module.
- */
+ 
 static void gatt_init(void)
 {
     ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
     APP_ERROR_CHECK(err_code);
 }
-
+*/
 
 /**@brief Function for handling Queued Write Module errors.
  *

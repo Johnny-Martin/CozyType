@@ -406,6 +406,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\base\GAP.c</FilePath>
             </File>
+            <File>
+              <FileName>GATT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\GATT.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4723,6 +4728,11 @@
               <FileName>GAP.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\base\GAP.c</FilePath>
+            </File>
+            <File>
+              <FileName>GATT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\GATT.c</FilePath>
             </File>
           </Files>
         </Group>
