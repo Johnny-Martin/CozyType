@@ -1,0 +1,5 @@
+.hypothesis
+/build/*
+/_build/*
+/RTE/*
+*.Administrator
