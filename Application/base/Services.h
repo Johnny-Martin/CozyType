@@ -24,4 +24,6 @@ void log_init(void);
 
 void buttons_leds_init(bool * p_erase_bonds, bsp_event_callback_t bsp_event_handler);
 
+void timers_init(void);
+
 #endif

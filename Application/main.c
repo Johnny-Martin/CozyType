@@ -505,20 +505,6 @@ static void ble_advertising_error_handler(uint32_t nrf_error)
     APP_ERROR_HANDLER(nrf_error);
 }
 
-/**@brief Function for the Timer initialization.
- *
- * @details Initializes the timer module.
- */
-static void timers_init(void)
-{
-    ret_code_t err_code;
-
-    err_code = app_timer_init();
-    APP_ERROR_CHECK(err_code);
-
-		create_battery_timer();
-}
-
 /**@brief Function for handling Queued Write Module errors.
  *
  * @details A pointer to this function will be passed to each service which may need to inform the
@@ -709,14 +695,6 @@ static void conn_params_init(void)
 
     err_code = ble_conn_params_init(&cp_init);
     APP_ERROR_CHECK(err_code);
-}
-
-
-/**@brief Function for starting timers.
- */
-static void timers_start(void)
-{
-		start_battery_timer();
 }
 
 
@@ -1452,7 +1430,9 @@ int main(void)
 
     // Start execution.
     NRF_LOG_INFO("HID Keyboard example started.");
-    timers_start();
+		create_battery_timer();
+    start_battery_timer();
+		
     advertising_start(erase_bonds);
 
     // Enter main loop.
