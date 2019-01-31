@@ -88,11 +88,12 @@
 #include "nrf_log_default_backends.h"
 
 #include "base\\Battery.h"
+#include "base\\DeviceInfo.h"
 
 #define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
 
 #define DEVICE_NAME                         "CozyType1"                          /**< Name of device. Will be included in the advertising data. */
-#define MANUFACTURER_NAME                   "NordicSemiconductor"                      /**< Manufacturer. Will be passed to Device Information Service. */
+//#define MANUFACTURER_NAME                   "NordicSemiconductor"                      /**< Manufacturer. Will be passed to Device Information Service. */
 
 #define APP_BLE_OBSERVER_PRIO               3                                          /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG                1                                          /**< A tag identifying the SoftDevice BLE configuration. */
@@ -558,13 +559,6 @@ static void timers_init(void)
     err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
 
-    // Create battery timer.
-	/*
-    err_code = app_timer_create(&m_battery_timer_id,
-                                APP_TIMER_MODE_REPEATED,
-                                battery_level_meas_timeout_handler);
-    APP_ERROR_CHECK(err_code);
-	*/
 		create_battery_timer();
 }
 
@@ -636,59 +630,6 @@ static void qwr_init(void)
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init_obj);
     APP_ERROR_CHECK(err_code);
 }
-
-
-/**@brief Function for initializing Device Information Service.
- */
-static void dis_init(void)
-{
-    ret_code_t       err_code;
-    ble_dis_init_t   dis_init_obj;
-    ble_dis_pnp_id_t pnp_id;
-
-    pnp_id.vendor_id_source = PNP_ID_VENDOR_ID_SOURCE;
-    pnp_id.vendor_id        = PNP_ID_VENDOR_ID;
-    pnp_id.product_id       = PNP_ID_PRODUCT_ID;
-    pnp_id.product_version  = PNP_ID_PRODUCT_VERSION;
-
-    memset(&dis_init_obj, 0, sizeof(dis_init_obj));
-
-    ble_srv_ascii_to_utf8(&dis_init_obj.manufact_name_str, MANUFACTURER_NAME);
-    dis_init_obj.p_pnp_id = &pnp_id;
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&dis_init_obj.dis_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&dis_init_obj.dis_attr_md.write_perm);
-
-    err_code = ble_dis_init(&dis_init_obj);
-    APP_ERROR_CHECK(err_code);
-}
-
-
-/**@brief Function for initializing Battery Service.
- */
-/*
-static void bas_init(void)
-{
-    ret_code_t     err_code;
-    ble_bas_init_t bas_init_obj;
-
-    memset(&bas_init_obj, 0, sizeof(bas_init_obj));
-
-    bas_init_obj.evt_handler          = NULL;
-    bas_init_obj.support_notification = true;
-    bas_init_obj.p_report_ref         = NULL;
-    bas_init_obj.initial_batt_level   = 100;
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&bas_init_obj.battery_level_char_attr_md.cccd_write_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&bas_init_obj.battery_level_char_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bas_init_obj.battery_level_char_attr_md.write_perm);
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&bas_init_obj.battery_level_report_read_perm);
-
-    err_code = ble_bas_init(&m_bas, &bas_init_obj);
-    APP_ERROR_CHECK(err_code);
-}*/
-
 
 /**@brief Function for initializing HID Service.
  */
@@ -824,20 +765,6 @@ static void services_init(void)
     hids_init();
 }
 
-
-/**@brief Function for initializing the battery sensor simulator.
- 
-static void sensor_simulator_init(void)
-{
-    m_battery_sim_cfg.min          = MIN_BATTERY_LEVEL;
-    m_battery_sim_cfg.max          = MAX_BATTERY_LEVEL;
-    m_battery_sim_cfg.incr         = BATTERY_LEVEL_INCREMENT;
-    m_battery_sim_cfg.start_at_max = true;
-
-    sensorsim_init(&m_battery_sim_state, &m_battery_sim_cfg);
-}
-*/
-
 /**@brief Function for handling a Connection Parameters error.
  *
  * @param[in]   nrf_error   Error code containing information about what went wrong.
@@ -875,12 +802,6 @@ static void conn_params_init(void)
  */
 static void timers_start(void)
 {
-	/*
-    ret_code_t err_code;
-
-    err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
-	*/
 		start_battery_timer();
 }
 
@@ -1208,28 +1129,6 @@ static void on_hid_rep_char_write(ble_hids_evt_t * p_evt)
         }
     }
 }
-
-
-/**@brief Function for putting the chip into sleep mode.
- *
- * @note This function will not return.
- 
-static void sleep_mode_enter(void)
-{
-    ret_code_t err_code;
-
-    err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    APP_ERROR_CHECK(err_code);
-
-    // Prepare wakeup buttons.
-    err_code = bsp_btn_ble_sleep_mode_prepare();
-    APP_ERROR_CHECK(err_code);
-
-    // Go to system-off mode (this function will not return; wakeup will cause a reset).
-    err_code = sd_power_system_off();
-    APP_ERROR_CHECK(err_code);
-}
-*/
 
 /**@brief Function for handling HID events.
  *
@@ -1630,17 +1529,6 @@ static void log_init(void)
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
-
-
-/**@brief Function for initializing power management.
- 
-static void power_management_init(void)
-{
-    ret_code_t err_code;
-    err_code = nrf_pwr_mgmt_init();
-    APP_ERROR_CHECK(err_code);
-}
-*/
 
 /**@brief Function for handling the idle state (main loop).
  *

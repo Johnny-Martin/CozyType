@@ -396,6 +396,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\main.c</FilePath>
             </File>
+            <File>
+              <FileName>DeviceInfo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\DeviceInfo.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4703,6 +4708,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>DeviceInfo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\DeviceInfo.c</FilePath>
             </File>
           </Files>
         </Group>
