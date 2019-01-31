@@ -8,6 +8,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "bsp_btn_ble.h"
+#include "nrf_ble_qwr.h"
 
 #define SCHED_MAX_EVENT_DATA_SIZE           APP_TIMER_SCHED_EVENT_DATA_SIZE            /**< Maximum size of scheduler events. */
 #ifdef SVCALL_AS_NORMAL_FUNCTION
@@ -26,4 +27,5 @@ void buttons_leds_init(bool * p_erase_bonds, bsp_event_callback_t bsp_event_hand
 
 void timers_init(void);
 
+void qwr_init(nrf_ble_qwr_t * p_qwr);
 #endif

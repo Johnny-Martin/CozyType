@@ -80,7 +80,7 @@
 #include "fds.h"
 #include "ble_conn_state.h"
 #include "nrf_ble_gatt.h"
-#include "nrf_ble_qwr.h"
+
 #include "nrf_pwr_mgmt.h"
 
 #include "nrf_log.h"
@@ -505,32 +505,6 @@ static void ble_advertising_error_handler(uint32_t nrf_error)
     APP_ERROR_HANDLER(nrf_error);
 }
 
-/**@brief Function for handling Queued Write Module errors.
- *
- * @details A pointer to this function will be passed to each service which may need to inform the
- *          application about an error.
- *
- * @param[in]   nrf_error   Error code containing information about what went wrong.
- */
-static void nrf_qwr_error_handler(uint32_t nrf_error)
-{
-    APP_ERROR_HANDLER(nrf_error);
-}
-
-
-/**@brief Function for initializing the Queued Write Module.
- */
-static void qwr_init(void)
-{
-    ret_code_t         err_code;
-    nrf_ble_qwr_init_t qwr_init_obj = {0};
-
-    qwr_init_obj.error_handler = nrf_qwr_error_handler;
-
-    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init_obj);
-    APP_ERROR_CHECK(err_code);
-}
-
 /**@brief Function for initializing HID Service.
  */
 static void hids_init(void)
@@ -652,17 +626,6 @@ static void hids_init(void)
 
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
     APP_ERROR_CHECK(err_code);
-}
-
-
-/**@brief Function for initializing services that will be used by the application.
- */
-static void services_init(void)
-{
-    qwr_init();
-    dis_init();
-    bas_init();
-    hids_init();
 }
 
 /**@brief Function for handling a Connection Parameters error.
@@ -1422,7 +1385,11 @@ int main(void)
     gap_params_init();
     gatt_init();
     advertising_init();
-    services_init();
+	
+				qwr_init(&m_qwr);
+				dis_init();
+				bas_init();
+				hids_init();
     sensor_simulator_init();
     conn_params_init();
     buffer_init();
