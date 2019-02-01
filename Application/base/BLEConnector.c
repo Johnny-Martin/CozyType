@@ -1,44 +1,26 @@
 
 #include"BLEConnector.h"
 
-uint16_t          		 m_conn_handle  = BLE_CONN_HANDLE_INVALID;  			/**< Handle of the current connection. */
-
-static pm_peer_id_t      m_peer_id;   
-static pm_peer_id_t      m_whitelist_peers[BLE_GAP_WHITELIST_ADDR_MAX_COUNT];   /**< List of peers currently in the whitelist. */
-static uint32_t          m_whitelist_peer_cnt;                      			/**< Number of peers currently in the whitelist. */
-BLE_ADVERTISING_DEF(m_advertising);                                 			/**< Advertising module instance. */
-NRF_BLE_QWR_DEF(m_qwr); 
 
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HUMAN_INTERFACE_DEVICE_SERVICE, BLE_UUID_TYPE_BLE}};
 
-/////////////////////////////////Queued Write Module/////////////////////////////////
-/**@brief Function for handling Queued Write Module errors.
- *
- * @details A pointer to this function will be passed to each service which may need to inform the
- *          application about an error.
- *
- * @param[in]   nrf_error   Error code containing information about what went wrong.
+static pm_peer_id_t      m_peer_id;                                 /**< Device reference handle to the current bonded central. */
+static uint32_t          m_whitelist_peer_cnt;                      /**< Number of peers currently in the whitelist. */
+static pm_peer_id_t      m_whitelist_peers[BLE_GAP_WHITELIST_ADDR_MAX_COUNT];   /**< List of peers currently in the whitelist. */
+
+NRF_BLE_QWR_DEF(m_qwr);                                             /**< Context for the Queued Write module.*/
+
+/**@brief Clear bond information from persistent storage.
  */
-static void nrf_qwr_error_handler(uint32_t nrf_error)
+static void delete_bonds(void)
 {
-    APP_ERROR_HANDLER(nrf_error);
-}
+    ret_code_t err_code;
 
-/**@brief Function for initializing the Queued Write Module.
- */
-void qwr_init(void)
-{
-    ret_code_t         err_code;
-    nrf_ble_qwr_init_t qwr_init_obj = {0};
+    NRF_LOG_INFO("Erase bonds!");
 
-    qwr_init_obj.error_handler = nrf_qwr_error_handler;
-
-    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init_obj);
+    err_code = pm_peers_delete();
     APP_ERROR_CHECK(err_code);
 }
-
-///////////////////////////////////////////////////////////////////////////////////////
-
 
 /**@brief Fetch the list of peer manager peer IDs.
  *
@@ -46,7 +28,7 @@ void qwr_init(void)
  * @param[inout] p_size    In: The size of the @p p_peers buffer.
  *                         Out: The number of peers copied in the buffer.
  */
-void peer_list_get(pm_peer_id_t * p_peers, uint32_t * p_size)
+static void peer_list_get(pm_peer_id_t * p_peers, uint32_t * p_size)
 {
     pm_peer_id_t peer_id;
     uint32_t     peers_to_copy;
@@ -62,18 +44,6 @@ void peer_list_get(pm_peer_id_t * p_peers, uint32_t * p_size)
         p_peers[(*p_size)++] = peer_id;
         peer_id = pm_next_peer_id_get(peer_id);
     }
-}
-
-/**@brief Clear bond information from persistent storage.
- */
-void delete_bonds(void)
-{
-    ret_code_t err_code;
-
-    NRF_LOG_INFO("Erase bonds!");
-
-    err_code = pm_peers_delete();
-    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for starting advertising.
@@ -114,7 +84,7 @@ void advertising_start(bool erase_bonds)
  *
  * @param[in] p_evt  Peer Manager event.
  */
-void pm_evt_handler(pm_evt_t const * p_evt)
+static void pm_evt_handler(pm_evt_t const * p_evt)
 {
     ret_code_t err_code;
 
@@ -236,53 +206,13 @@ void pm_evt_handler(pm_evt_t const * p_evt)
     }
 }
 
-/**@brief Function for handling advertising errors.
- *
- * @param[in] nrf_error  Error code containing information about what went wrong.
- */
-void ble_advertising_error_handler(uint32_t nrf_error)
-{
-    APP_ERROR_HANDLER(nrf_error);
-}
-
-/**@brief Function for handling a Connection Parameters error.
- *
- * @param[in]   nrf_error   Error code containing information about what went wrong.
- */
-void conn_params_error_handler(uint32_t nrf_error)
-{
-    APP_ERROR_HANDLER(nrf_error);
-}
-
-/**@brief Function for initializing the Connection Parameters module.
- */
-void conn_params_init(void)
-{
-    ret_code_t             err_code;
-    ble_conn_params_init_t cp_init;
-
-    memset(&cp_init, 0, sizeof(cp_init));
-
-    cp_init.p_conn_params                  = NULL;
-    cp_init.first_conn_params_update_delay = FIRST_CONN_PARAMS_UPDATE_DELAY;
-    cp_init.next_conn_params_update_delay  = NEXT_CONN_PARAMS_UPDATE_DELAY;
-    cp_init.max_conn_params_update_count   = MAX_CONN_PARAMS_UPDATE_COUNT;
-    cp_init.start_on_notify_cccd_handle    = BLE_GATT_HANDLE_INVALID;
-    cp_init.disconnect_on_fail             = false;
-    cp_init.evt_handler                    = NULL;
-    cp_init.error_handler                  = conn_params_error_handler;
-
-    err_code = ble_conn_params_init(&cp_init);
-    APP_ERROR_CHECK(err_code);
-}
-
 /**@brief Function for handling advertising events.
  *
  * @details This function will be called for advertising events which are passed to the application.
  *
  * @param[in] ble_adv_evt  Advertising event.
  */
-void on_adv_evt(ble_adv_evt_t ble_adv_evt)
+static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
     ret_code_t err_code;
 
@@ -290,42 +220,42 @@ void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     {
         case BLE_ADV_EVT_DIRECTED_HIGH_DUTY:
             NRF_LOG_INFO("High Duty Directed advertising.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_DIRECTED:
             NRF_LOG_INFO("Directed advertising.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_FAST:
             NRF_LOG_INFO("Fast advertising.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW:
             NRF_LOG_INFO("Slow advertising.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_SLOW);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_SLOW);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_FAST_WHITELIST:
             NRF_LOG_INFO("Fast advertising with whitelist.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW_WHITELIST:
             NRF_LOG_INFO("Slow advertising with whitelist.");
-            //err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
+            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_IDLE:
-            //--todo sleep_mode_enter();
+            sleep_mode_enter();
             break;
 
         case BLE_ADV_EVT_WHITELIST_REQUEST:
@@ -374,12 +304,119 @@ void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     }
 }
 
+/**@brief Function for handling advertising errors.
+ *
+ * @param[in] nrf_error  Error code containing information about what went wrong.
+ */
+static void ble_advertising_error_handler(uint32_t nrf_error)
+{
+    APP_ERROR_HANDLER(nrf_error);
+}
+
+/**@brief Function for initializing the Advertising functionality.
+ */
+void advertising_init()
+{
+    uint32_t               err_code;
+    uint8_t                adv_flags;
+    ble_advertising_init_t init;
+
+    memset(&init, 0, sizeof(init));
+
+    adv_flags                            = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+    init.advdata.include_appearance      = true;
+    init.advdata.flags                   = adv_flags;
+    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
+    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
+
+    init.config.ble_adv_whitelist_enabled          = true;
+    init.config.ble_adv_directed_high_duty_enabled = true;
+    init.config.ble_adv_directed_enabled           = false;
+    init.config.ble_adv_directed_interval          = 0;
+    init.config.ble_adv_directed_timeout           = 0;
+    init.config.ble_adv_fast_enabled               = true;
+    init.config.ble_adv_fast_interval              = APP_ADV_FAST_INTERVAL;
+    init.config.ble_adv_fast_timeout               = APP_ADV_FAST_DURATION;
+    init.config.ble_adv_slow_enabled               = true;
+    init.config.ble_adv_slow_interval              = APP_ADV_SLOW_INTERVAL;
+    init.config.ble_adv_slow_timeout               = APP_ADV_SLOW_DURATION;
+
+    init.evt_handler   = on_adv_evt;
+    init.error_handler = ble_advertising_error_handler;
+
+    err_code = ble_advertising_init(&m_advertising, &init);
+    APP_ERROR_CHECK(err_code);
+
+    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
+}
+
+
+/**@brief Function for handling Queued Write Module errors.
+ *
+ * @details A pointer to this function will be passed to each service which may need to inform the
+ *          application about an error.
+ *
+ * @param[in]   nrf_error   Error code containing information about what went wrong.
+ */
+static void nrf_qwr_error_handler(uint32_t nrf_error)
+{
+    APP_ERROR_HANDLER(nrf_error);
+}
+
+
+/**@brief Function for the Peer Manager initialization.
+ */
+void peer_manager_init()
+{
+    ble_gap_sec_params_t sec_param;
+    ret_code_t           err_code;
+
+    err_code = pm_init();
+    APP_ERROR_CHECK(err_code);
+
+    memset(&sec_param, 0, sizeof(ble_gap_sec_params_t));
+
+    // Security parameters to be used for all security procedures.
+    sec_param.bond           = SEC_PARAM_BOND;
+    sec_param.mitm           = SEC_PARAM_MITM;
+    sec_param.lesc           = SEC_PARAM_LESC;
+    sec_param.keypress       = SEC_PARAM_KEYPRESS;
+    sec_param.io_caps        = SEC_PARAM_IO_CAPABILITIES;
+    sec_param.oob            = SEC_PARAM_OOB;
+    sec_param.min_key_size   = SEC_PARAM_MIN_KEY_SIZE;
+    sec_param.max_key_size   = SEC_PARAM_MAX_KEY_SIZE;
+    sec_param.kdist_own.enc  = 1;
+    sec_param.kdist_own.id   = 1;
+    sec_param.kdist_peer.enc = 1;
+    sec_param.kdist_peer.id  = 1;
+
+    err_code = pm_sec_params_set(&sec_param);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = pm_register(pm_evt_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+/**@brief Function for initializing the Queued Write Module.
+ */
+void qwr_init()
+{
+    ret_code_t         err_code;
+    nrf_ble_qwr_init_t qwr_init_obj = {0};
+
+    qwr_init_obj.error_handler = nrf_qwr_error_handler;
+
+    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init_obj);
+    APP_ERROR_CHECK(err_code);
+}
+
 /**@brief Function for handling BLE events.
  *
  * @param[in]   p_ble_evt   Bluetooth stack event.
  * @param[in]   p_context   Unused.
  */
-void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
+static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
     ret_code_t err_code;
 
@@ -387,8 +424,8 @@ void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected");
-            //err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
+            APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
@@ -397,16 +434,16 @@ void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected");
             // Dequeue all keys without transmission.
-            //--todo (void) buffer_dequeue(false);
+            (void) buffer_dequeue(false);
 
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
 
             // Reset m_caps_on variable. Upon reconnect, the HID host will re-send the Output
             // report containing the Caps lock state.
-            //m_caps_on = false;
+            m_caps_on = false;
             // disabling alert 3. signal - used for capslock ON
-            //err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
-            //APP_ERROR_CHECK(err_code);
+            err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
+            APP_ERROR_CHECK(err_code);
 
             break; // BLE_GAP_EVT_DISCONNECTED
 
@@ -424,7 +461,7 @@ void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GATTS_EVT_HVN_TX_COMPLETE:
             // Send next key event
-            //--todo (void) buffer_dequeue(true);
+            (void) buffer_dequeue(true);
             break;
 
         case BLE_GATTC_EVT_TIMEOUT:
@@ -474,73 +511,34 @@ void ble_stack_init(void)
     NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
-/**@brief Function for the Peer Manager initialization.
+/**@brief Function for handling a Connection Parameters error.
+ *
+ * @param[in]   nrf_error   Error code containing information about what went wrong.
  */
-void peer_manager_init(void)
+static void conn_params_error_handler(uint32_t nrf_error)
 {
-    ble_gap_sec_params_t sec_param;
-    ret_code_t           err_code;
+    APP_ERROR_HANDLER(nrf_error);
+}
 
-    err_code = pm_init();
-    APP_ERROR_CHECK(err_code);
+/**@brief Function for initializing the Connection Parameters module.
+ */
+void conn_params_init(void)
+{
+    ret_code_t             err_code;
+    ble_conn_params_init_t cp_init;
 
-    memset(&sec_param, 0, sizeof(ble_gap_sec_params_t));
+    memset(&cp_init, 0, sizeof(cp_init));
 
-    // Security parameters to be used for all security procedures.
-    sec_param.bond           = SEC_PARAM_BOND;
-    sec_param.mitm           = SEC_PARAM_MITM;
-    sec_param.lesc           = SEC_PARAM_LESC;
-    sec_param.keypress       = SEC_PARAM_KEYPRESS;
-    sec_param.io_caps        = SEC_PARAM_IO_CAPABILITIES;
-    sec_param.oob            = SEC_PARAM_OOB;
-    sec_param.min_key_size   = SEC_PARAM_MIN_KEY_SIZE;
-    sec_param.max_key_size   = SEC_PARAM_MAX_KEY_SIZE;
-    sec_param.kdist_own.enc  = 1;
-    sec_param.kdist_own.id   = 1;
-    sec_param.kdist_peer.enc = 1;
-    sec_param.kdist_peer.id  = 1;
+    cp_init.p_conn_params                  = NULL;
+    cp_init.first_conn_params_update_delay = FIRST_CONN_PARAMS_UPDATE_DELAY;
+    cp_init.next_conn_params_update_delay  = NEXT_CONN_PARAMS_UPDATE_DELAY;
+    cp_init.max_conn_params_update_count   = MAX_CONN_PARAMS_UPDATE_COUNT;
+    cp_init.start_on_notify_cccd_handle    = BLE_GATT_HANDLE_INVALID;
+    cp_init.disconnect_on_fail             = false;
+    cp_init.evt_handler                    = NULL;
+    cp_init.error_handler                  = conn_params_error_handler;
 
-    err_code = pm_sec_params_set(&sec_param);
-    APP_ERROR_CHECK(err_code);
-
-    err_code = pm_register(pm_evt_handler);
+    err_code = ble_conn_params_init(&cp_init);
     APP_ERROR_CHECK(err_code);
 }
 
-/**@brief Function for initializing the Advertising functionality.
- */
-void advertising_init(void)
-{
-    uint32_t               err_code;
-    uint8_t                adv_flags;
-    ble_advertising_init_t init;
-
-    memset(&init, 0, sizeof(init));
-
-    adv_flags                            = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-    init.advdata.name_type               = BLE_ADVDATA_FULL_NAME;
-    init.advdata.include_appearance      = true;
-    init.advdata.flags                   = adv_flags;
-    init.advdata.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
-    init.advdata.uuids_complete.p_uuids  = m_adv_uuids;
-
-    init.config.ble_adv_whitelist_enabled          = true;
-    init.config.ble_adv_directed_high_duty_enabled = true;
-    init.config.ble_adv_directed_enabled           = false;
-    init.config.ble_adv_directed_interval          = 0;
-    init.config.ble_adv_directed_timeout           = 0;
-    init.config.ble_adv_fast_enabled               = true;
-    init.config.ble_adv_fast_interval              = APP_ADV_FAST_INTERVAL;
-    init.config.ble_adv_fast_timeout               = APP_ADV_FAST_DURATION;
-    init.config.ble_adv_slow_enabled               = true;
-    init.config.ble_adv_slow_interval              = APP_ADV_SLOW_INTERVAL;
-    init.config.ble_adv_slow_timeout               = APP_ADV_SLOW_DURATION;
-
-    init.evt_handler   = on_adv_evt;
-    init.error_handler = ble_advertising_error_handler;
-
-    err_code = ble_advertising_init(&m_advertising, &init);
-    APP_ERROR_CHECK(err_code);
-
-    ble_advertising_conn_cfg_tag_set(&m_advertising, APP_BLE_CONN_CFG_TAG);
-}

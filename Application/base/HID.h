@@ -21,10 +21,10 @@
 #define OUTPUT_REP_REF_ID                   0                                          /**< Id of reference to Keyboard Output Report. */
 
 
-#define BASE_USB_HID_SPEC_VERSION           0x0101                                      /**< Version number of base USB HID Specification implemented by this application. */
-#define INPUT_REPORT_KEYS_MAX_LEN           8                                           /**< Maximum length of the Input Report characteristic. */
+#define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
+#define INPUT_REPORT_KEYS_MAX_LEN           8                                          /**< Maximum length of the Input Report characteristic. */
 
-#define MAX_BUFFER_ENTRIES                  5                                          /**< Number of elements that can be enqueued */
+#define MAX_BUFFER_ENTRIES                  5                                           /**< Number of elements that can be enqueued */
 
 /** Abstracts buffer element */
 typedef struct hid_key_buffer

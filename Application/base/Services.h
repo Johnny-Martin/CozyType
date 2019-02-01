@@ -1,5 +1,5 @@
-#ifndef SCHEDULER_H__
-#define SCHEDULER_H__
+#ifndef SERVICES_H__
+#define SERVICES_H__
 
 #include "app_error.h"
 #include "app_timer.h"
@@ -31,16 +31,6 @@
 #endif
 
 
-#define SEC_PARAM_BOND                      1                                          /**< Perform bonding. */
-#define SEC_PARAM_MITM                      0                                          /**< Man In The Middle protection not required. */
-#define SEC_PARAM_LESC                      0                                          /**< LE Secure Connections not enabled. */
-#define SEC_PARAM_KEYPRESS                  0                                          /**< Keypress notifications not enabled. */
-#define SEC_PARAM_IO_CAPABILITIES           BLE_GAP_IO_CAPS_NONE                       /**< No I/O capabilities. */
-#define SEC_PARAM_OOB                       0                                          /**< Out Of Band data not available. */
-#define SEC_PARAM_MIN_KEY_SIZE              7                                          /**< Minimum encryption key size. */
-#define SEC_PARAM_MAX_KEY_SIZE              16                                         /**< Maximum encryption key size. */
-
-
 void scheduler_init(void);
 
 /**@brief Function for initializing the nrf log module.
@@ -51,7 +41,4 @@ void buttons_leds_init(bool * p_erase_bonds, bsp_event_callback_t bsp_event_hand
 
 void timers_init(void);
 
-void qwr_init(nrf_ble_qwr_t * p_qwr);
-
-void peer_manager_init(pm_evt_handler_t pm_evt_handler);
 #endif
