@@ -49,6 +49,7 @@ void timers_init(void)
 /**@brief Function for the GPIO initialization.
  *
  * @details Initializes the GPIO module.
+ * @warning you'd better invoke this function at the begining of main
  */
 void gpiote_init(void)
 {

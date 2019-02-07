@@ -24,7 +24,9 @@ void init_led_beacon(){
 	//nrf_gpio_cfg_input(INPUT_PIN2, NRF_GPIO_PIN_PULLUP);
 	//nrf_gpio_cfg_input(INPUT_PIN3, NRF_GPIO_PIN_PULLUP);
 }
-
+/**@brief test the PCB board with GPIOTE.
+ * @details the signal on INPUT_PIN1 controls the red LED light on and off.
+ */
 void init_led_gpiote(void){
 	int32_t err_code = NRF_SUCCESS;
 	//toggle the led pin while the input event occurs.
@@ -67,6 +69,9 @@ void blinking(){
 	
 }
 
+/**@brief test PCB board
+ *
+ */
 void led_red(bool on){
 	if(on){
 		nrf_gpio_pin_set(m_red_pin);
