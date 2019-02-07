@@ -14,8 +14,7 @@ void scheduler_init(void)
  */
 void log_init(void)
 {
-    ret_code_t err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
@@ -44,8 +43,25 @@ void buttons_leds_init(bool * p_erase_bonds, bsp_event_callback_t bsp_event_hand
  */
 void timers_init(void)
 {
-    ret_code_t err_code;
+    APP_ERROR_CHECK(app_timer_init());
+}
 
-    err_code = app_timer_init();
-    APP_ERROR_CHECK(err_code);
+/**@brief Function for the GPIO initialization.
+ *
+ * @details Initializes the GPIO module.
+ */
+void gpiote_init(void)
+{
+    APP_ERROR_CHECK(nrf_drv_gpiote_init());
+}
+
+/**@brief Function for the PPI initialization.
+ *
+ * @details Initializes the PPI module. 
+ * @warning *must* set NRFX_PPI_ENABLED micro in sdk_config.h
+ * 			to enable the PPI module
+ */
+void ppi_init(void)
+{
+    APP_ERROR_CHECK(nrf_drv_ppi_init());
 }

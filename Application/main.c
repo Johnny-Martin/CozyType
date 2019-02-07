@@ -95,6 +95,8 @@
 #include "base\\HID.h"
 #include "base\\BLEConnector.h"
 
+#include "LED.h"
+
 #define DEAD_BEEF                           0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 #define MAX_KEYS_IN_ONE_REPORT              (INPUT_REPORT_KEYS_MAX_LEN - SCAN_CODE_POS)/**< Maximum number of key presses that can be sent in one Input Report. */
@@ -203,7 +205,7 @@ static void bsp_event_handler(bsp_event_t event)
                 }
             }
             break;
-
+			
         default:
             break;
     }
@@ -230,6 +232,7 @@ int main(void)
 
     // Initialize.
     log_init();
+	gpiote_init();
     timers_init();
     buttons_leds_init(&erase_bonds, bsp_event_handler);
     power_management_init();
@@ -248,16 +251,23 @@ int main(void)
     buffer_init();
     peer_manager_init();
 
+	ppi_init();
+	
     // Start execution.
     NRF_LOG_INFO("HID Keyboard example started.");
 	create_battery_timer();
     start_battery_timer();
 		
     advertising_start(erase_bonds);
-
+	
+	init_led_beacon();
+	init_led_gpiote();
     // Enter main loop.
     for (;;)
     {
+		//led_red(true);
+		//led_green(true);
+		//led_logic();
         idle_state_handle();
     }
 }

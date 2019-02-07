@@ -22,6 +22,9 @@
 #include "ble_conn_params.h"
 
 #include "peer_manager.h"
+#include "nrf_drv_gpiote.h"
+#include "nrf_drv_ppi.h"
+#include "nrfx_ppi.h"
 
 #define SCHED_MAX_EVENT_DATA_SIZE           APP_TIMER_SCHED_EVENT_DATA_SIZE            /**< Maximum size of scheduler events. */
 #ifdef SVCALL_AS_NORMAL_FUNCTION
@@ -41,4 +44,7 @@ void buttons_leds_init(bool * p_erase_bonds, bsp_event_callback_t bsp_event_hand
 
 void timers_init(void);
 
+void gpiote_init(void);
+
+void ppi_init(void);
 #endif

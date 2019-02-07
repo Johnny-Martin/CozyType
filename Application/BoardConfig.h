@@ -8,6 +8,7 @@
 
 __STATIC_INLINE bool isRightHand(){
 	nrf_gpio_cfg_input(LEFT_CONFIG, NRF_GPIO_PIN_PULLUP);
+	//the left PCB board need short the jump.
 	return nrf_gpio_pin_read(LEFT_CONFIG) == 0;
 }
 

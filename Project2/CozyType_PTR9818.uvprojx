@@ -426,6 +426,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\base\BLEConnector.c</FilePath>
             </File>
+            <File>
+              <FileName>LED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\LED.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2298,6 +2303,16 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrfx_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\modules\nrfx\drivers\src\nrfx_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4764,6 +4779,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\base\BLEConnector.c</FilePath>
             </File>
+            <File>
+              <FileName>LED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\LED.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -6636,6 +6656,16 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrfx_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\modules\nrfx\drivers\src\nrfx_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
           </Files>
         </Group>
