@@ -6,8 +6,7 @@ BLE_HIDS_DEF(m_hids,                                                /**< Structu
              INPUT_REPORT_KEYS_MAX_LEN,
              OUTPUT_REPORT_MAX_LEN);
 			 
-bool              m_in_boot_mode = false;                    /**< Current protocol mode. */
-
+bool              		 m_in_boot_mode = false;               		/**< Current protocol mode. */
 static buffer_list_t     buffer_list;                               /**< List to enqueue not just data to be sent, but also related information like the handle, connection handle etc */
 
 
@@ -31,6 +30,37 @@ static uint8_t m_caps_off_key_scan_str[] = /**< Key pattern to be sent when the 
     0x09,       /* Key f */
 };
 
+/**@brief Function for handling HID events.
+ *
+ * @details This function will be called for all HID events which are passed to the application.
+ *
+ * @param[in]   p_hids  HID service structure.
+ * @param[in]   p_evt   Event received from the HID service.
+ */
+static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt)
+{
+    switch (p_evt->evt_type)
+    {
+        case BLE_HIDS_EVT_BOOT_MODE_ENTERED:
+            m_in_boot_mode = true;
+            break;
+
+        case BLE_HIDS_EVT_REPORT_MODE_ENTERED:
+            m_in_boot_mode = false;
+            break;
+
+        case BLE_HIDS_EVT_REP_CHAR_WRITE:
+            on_hid_rep_char_write(p_evt);
+            break;
+
+        case BLE_HIDS_EVT_NOTIF_ENABLED:
+            break;
+
+        default:
+            // No implementation needed.
+            break;
+    }
+}
 
 /**@brief Function for handling Service errors.
  *
@@ -483,37 +513,5 @@ void on_hid_rep_char_write(ble_hids_evt_t * p_evt)
                 // The report received is not supported by this application. Do nothing.
             }
         }
-    }
-}
-
-/**@brief Function for handling HID events.
- *
- * @details This function will be called for all HID events which are passed to the application.
- *
- * @param[in]   p_hids  HID service structure.
- * @param[in]   p_evt   Event received from the HID service.
- */
-void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt)
-{
-    switch (p_evt->evt_type)
-    {
-        case BLE_HIDS_EVT_BOOT_MODE_ENTERED:
-            m_in_boot_mode = true;
-            break;
-
-        case BLE_HIDS_EVT_REPORT_MODE_ENTERED:
-            m_in_boot_mode = false;
-            break;
-
-        case BLE_HIDS_EVT_REP_CHAR_WRITE:
-            on_hid_rep_char_write(p_evt);
-            break;
-
-        case BLE_HIDS_EVT_NOTIF_ENABLED:
-            break;
-
-        default:
-            // No implementation needed.
-            break;
     }
 }

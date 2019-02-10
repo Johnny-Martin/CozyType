@@ -138,7 +138,7 @@ uint16_t          		 m_conn_handle  = BLE_CONN_HANDLE_INVALID;  /**< Handle of t
 bool              		 m_caps_on = false;                         /**< Variable to indicate if Caps Lock is turned on. */
 
 
-static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt);
+//static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt);
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
