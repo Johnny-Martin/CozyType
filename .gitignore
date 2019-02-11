@@ -1,5 +1,8 @@
 .hypothesis
-/build/*
-/_build/*
-/RTE/*
+build/*
+_build/
+RTE/
 *.Administrator
+*.uvoptx
+*.uvguix
+*.uvguix.*
