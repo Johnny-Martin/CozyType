@@ -397,24 +397,9 @@
               <FilePath>..\Application\main.c</FilePath>
             </File>
             <File>
-              <FileName>DeviceInfo.c</FileName>
+              <FileName>ServicesInit.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\base\DeviceInfo.c</FilePath>
-            </File>
-            <File>
-              <FileName>GAP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\GAP.c</FilePath>
-            </File>
-            <File>
-              <FileName>GATT.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\GATT.c</FilePath>
-            </File>
-            <File>
-              <FileName>Services.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\Services.c</FilePath>
+              <FilePath>..\Application\base\ServicesInit.c</FilePath>
             </File>
             <File>
               <FileName>HID.c</FileName>
@@ -4755,24 +4740,9 @@
               <FilePath>..\Application\main.c</FilePath>
             </File>
             <File>
-              <FileName>DeviceInfo.c</FileName>
+              <FileName>ServicesInit.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\base\DeviceInfo.c</FilePath>
-            </File>
-            <File>
-              <FileName>GAP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\GAP.c</FilePath>
-            </File>
-            <File>
-              <FileName>GATT.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\GATT.c</FilePath>
-            </File>
-            <File>
-              <FileName>Services.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\Services.c</FilePath>
+              <FilePath>..\Application\base\ServicesInit.c</FilePath>
             </File>
             <File>
               <FileName>HID.c</FileName>
