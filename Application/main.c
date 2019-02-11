@@ -88,9 +88,6 @@
 #include "nrf_log_default_backends.h"
 
 #include "base\\Battery.h"
-#include "base\\DeviceInfo.h"
-#include "base\\GAP.h"
-#include "base\\GATT.h"
 #include "base\\ServicesInit.h"
 #include "base\\HID.h"
 #include "base\\BLEConnector.h"
