@@ -91,7 +91,7 @@
 #include "base\\DeviceInfo.h"
 #include "base\\GAP.h"
 #include "base\\GATT.h"
-#include "base\\Services.h"
+#include "base\\ServicesInit.h"
 #include "base\\HID.h"
 #include "base\\BLEConnector.h"
 #include "base\\BSP.h"
