@@ -431,6 +431,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
             </File>
+            <File>
+              <FileName>BSP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\BSP.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4783,6 +4788,11 @@
               <FileName>LED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
+            </File>
+            <File>
+              <FileName>BSP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\base\BSP.c</FilePath>
             </File>
           </Files>
         </Group>
