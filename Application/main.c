@@ -92,38 +92,12 @@
 #include "base\\HID.h"
 #include "base\\BLEConnector.h"
 #include "base\\BSP.h"
-
 #include "LED.h"
 
-#define DEAD_BEEF                           0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
-
-/**@brief   Macro for defining a ble_advertising instance without static modifier, so other file can use it.
- *
- * @param   _name   Name of the instance.
- * @hideinitializer
- */
-#define BLE_ADVERTISING_DEF_GLOBAL(_name)                                                           \
-ble_advertising_t _name;                                                                     		\
-NRF_SDH_BLE_OBSERVER(_name ## _ble_obs,                                                             \
-                     BLE_ADV_BLE_OBSERVER_PRIO,                                                     \
-                     ble_advertising_on_ble_evt, &_name);                                           \
-NRF_SDH_SOC_OBSERVER(_name ## _soc_obs,                                                             \
-                     BLE_ADV_SOC_OBSERVER_PRIO,                                                     \
-                     ble_advertising_on_sys_evt, &_name)
-
-BLE_HIDS_DEF(m_hids,                                                /**< Structure used to identify the HID service. */
-             NRF_SDH_BLE_TOTAL_LINK_COUNT,
-             INPUT_REPORT_KEYS_MAX_LEN,
-             OUTPUT_REPORT_MAX_LEN);
-BLE_BAS_DEF(m_bas);                                                 /**< Structure used to identify the battery service. */
-
-BLE_ADVERTISING_DEF_GLOBAL(m_advertising);                          /**< Advertising module instance. */
+#define DEAD_BEEF        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 uint16_t          		 m_conn_handle  = BLE_CONN_HANDLE_INVALID;  /**< Handle of the current connection. */
 bool              		 m_caps_on = false;                         /**< Variable to indicate if Caps Lock is turned on. */
-
-
-//static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt);
 
 /**@brief Callback function for asserts in the SoftDevice.
  *

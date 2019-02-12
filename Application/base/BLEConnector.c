@@ -542,3 +542,6 @@ void conn_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
+uint32_t restart_ble_advertising_without_whitelist(void){
+	return ble_advertising_restart_without_whitelist(&m_advertising);
+}

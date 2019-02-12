@@ -47,7 +47,8 @@
 #define NEXT_CONN_PARAMS_UPDATE_DELAY       APP_TIMER_TICKS(30000)                     /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT        3                                          /**< Number of attempts before giving up the connection parameter negotiation. */
 
-extern ble_advertising_t 					m_advertising;
+BLE_ADVERTISING_DEF(m_advertising);                          						   /**< Advertising module instance. */
+
 extern uint16_t          			  	 	m_conn_handle;
 extern bool              		 			m_caps_on;
 
@@ -63,4 +64,7 @@ void peer_manager_init(void);
 void qwr_init(void);
 
 void conn_params_init(void);
+
+uint32_t restart_ble_advertising_without_whitelist(void);
+
 #endif
