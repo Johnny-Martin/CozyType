@@ -1,6 +1,16 @@
-
 #include "Battery.h"
 
+#include "ble_bas.h"
+#include "ble_dis.h"
+#include "sensorsim.h"
+#include "nrf_pwr_mgmt.h"
+#include "app_error.h"
+#include "app_timer.h"
+
+#define BATTERY_LEVEL_MEAS_INTERVAL         APP_TIMER_TICKS(2000)                      /**< Battery level measurement interval (ticks). */
+#define MIN_BATTERY_LEVEL                   81                                         /**< Minimum simulated battery level. */
+#define MAX_BATTERY_LEVEL                   100                                        /**< Maximum simulated battery level. */
+#define BATTERY_LEVEL_INCREMENT             1                                          /**< Increment between each simulated battery level measurement. */
 
 BLE_BAS_DEF(m_bas);
 

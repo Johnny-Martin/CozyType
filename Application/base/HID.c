@@ -1,5 +1,20 @@
+#include "HID.h"
 
-#include"HID.h"
+#include "app_error.h"
+#include "nrf_log.h"
+#include "bsp.h"
+
+#define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
+
+#define MODIFIER_KEY_POS                    0                                          /**< Position of the modifier byte in the Input Report. */
+#define SHIFT_KEY_CODE                      0x02                                       /**< Key code indicating the press of the Shift Key. */
+#define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
+#define OUTPUT_REPORT_INDEX                 0                                          /**< Index of Output Report. */
+#define OUTPUT_REPORT_MAX_LEN               1                                          /**< Maximum length of Output Report. */
+#define INPUT_REPORT_KEYS_INDEX             0                                          /**< Index of Input Report. */
+#define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       /**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
+#define INPUT_REP_REF_ID                    0                                          /**< Id of reference to Keyboard Input Report. */
+#define OUTPUT_REP_REF_ID                   0                                          /**< Id of reference to Keyboard Output Report. */
 
 BLE_HIDS_DEF(m_hids,                                                /**< Structure used to identify the HID service. */
              NRF_SDH_BLE_TOTAL_LINK_COUNT,
@@ -9,6 +24,8 @@ BLE_HIDS_DEF(m_hids,                                                /**< Structu
 bool              		 m_in_boot_mode = false;               		/**< Current protocol mode. */
 static buffer_list_t     buffer_list;                               /**< List to enqueue not just data to be sent, but also related information like the handle, connection handle etc */
 
+extern uint16_t 			m_conn_handle;
+extern bool              	m_caps_on;  
 
 static uint8_t m_caps_on_key_scan_str[] = /**< Key pattern to be sent when the output report has been written with the CAPS LOCK bit set. */
 {

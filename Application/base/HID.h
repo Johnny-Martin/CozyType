@@ -1,29 +1,10 @@
-#ifndef BLE_HID_H__
-#define BLE_HID_H__
+#ifndef COZY_TYPE_BLE_HID_H__
+#define COZY_TYPE_BLE_HID_H__
 
-#include "app_error.h"
 #include "ble_hids.h"
-#include "nrf_log.h"
-#include "bsp.h"
 
-
-#define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
-
-#define MODIFIER_KEY_POS                    0                                          /**< Position of the modifier byte in the Input Report. */
 #define SCAN_CODE_POS                       2                                          /**< The start position of the key scan code in a HID Report. */
-#define SHIFT_KEY_CODE                      0x02                                       /**< Key code indicating the press of the Shift Key. */
-
-#define OUTPUT_REPORT_INDEX                 0                                          /**< Index of Output Report. */
-#define OUTPUT_REPORT_MAX_LEN               1                                          /**< Maximum length of Output Report. */
-#define INPUT_REPORT_KEYS_INDEX             0                                          /**< Index of Input Report. */
-#define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       /**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
-#define INPUT_REP_REF_ID                    0                                          /**< Id of reference to Keyboard Input Report. */
-#define OUTPUT_REP_REF_ID                   0                                          /**< Id of reference to Keyboard Output Report. */
-
-
-#define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
 #define INPUT_REPORT_KEYS_MAX_LEN           8                                          /**< Maximum length of the Input Report characteristic. */
-
 #define MAX_BUFFER_ENTRIES                  5                                           /**< Number of elements that can be enqueued */
 
 /** Abstracts buffer element */
@@ -75,10 +56,6 @@ typedef struct
         buffer_list.buffer[(i)].p_data = NULL; \
     } while (0)
 
-	
-extern uint16_t 			m_conn_handle;
-extern bool              	m_caps_on;  
-	
 void hids_init(void);
 void buffer_init(void);
 uint32_t buffer_dequeue(bool tx_flag);

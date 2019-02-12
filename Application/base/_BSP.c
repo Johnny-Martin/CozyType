@@ -1,10 +1,30 @@
-
 #include "BSP.h"
+
+#include "app_error.h"
+#include "app_scheduler.h"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+#include "bsp_btn_ble.h"
+
+#include "ble.h"
+#include "ble_err.h"
+#include "ble_hci.h"
+#include "ble_srv_common.h"
+#include "ble_advertising.h"
+#include "ble_advdata.h"
+#include "ble_hids.h"
+#include "ble_bas.h"
+#include "ble_dis.h"
+#include "ble_conn_params.h"
+
 #include "HID.h"
 #include "Battery.h"
 #include "BLEConnector.h"
 
 #define MAX_KEYS_IN_ONE_REPORT              (INPUT_REPORT_KEYS_MAX_LEN - SCAN_CODE_POS)/**< Maximum number of key presses that can be sent in one Input Report. */
+
+extern uint16_t 			m_conn_handle;
 
 static uint8_t m_sample_key_press_scan_str[] = /**< Key pattern to be sent when the key press button has been pushed. */
 {
