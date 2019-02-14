@@ -40,7 +40,7 @@
 #define PNP_ID_PRODUCT_VERSION              0x0001                                     /**< Product Version. */
 			
 #define MANUFACTURER_NAME                   "JM-Build"                      		   /**< Manufacturer. Will be passed to Device Information Service. */
-#define DEVICE_NAME                         "CozyType_Keyboard"                        /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                         "CozyType"                        		   /**< Name of device. Will be included in the advertising data. */
 
 #define MIN_CONN_INTERVAL                   MSEC_TO_UNITS(7.5, UNIT_1_25_MS)           /**< Minimum connection interval (7.5 ms) */
 #define MAX_CONN_INTERVAL                   MSEC_TO_UNITS(30, UNIT_1_25_MS)            /**< Maximum connection interval (30 ms). */
