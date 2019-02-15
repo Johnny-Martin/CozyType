@@ -4,30 +4,127 @@
 #include "nrf_log.h"
 #include "bsp.h"
 
-#define SHIFT_BUTTON_ID                     1                                          /**< Button used as 'SHIFT' Key. */
+#define SHIFT_BUTTON_ID                     1                                          	/**< Button used as 'SHIFT' Key. */
+	
+#define MODIFIER_KEY_POS                    0                                          	/**< Position of the modifier byte in the Input Report. */
+#define SHIFT_KEY_CODE                      0x02                                       	/**< Key code indicating the press of the Shift Key. */
+#define BASE_USB_HID_SPEC_VERSION           0x0101                                     	/**< Version number of base USB HID Specification implemented by this application. */
+#define OUTPUT_REPORT_INDEX                 0                                          	/**< Index of Output Report. */
+#define OUTPUT_REPORT_MAX_LEN               1                                          	/**< Maximum length of Output Report. */
+#define INPUT_REPORT_KEYS_INDEX             0                                          	/**< Index of Input Report. */
+#define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       	/**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
+#define INPUT_REP_REF_ID                    0                                          	/**< Id of reference to Keyboard Input Report. */
+#define OUTPUT_REP_REF_ID                   0                                          	/**< Id of reference to Keyboard Output Report. */
 
-#define MODIFIER_KEY_POS                    0                                          /**< Position of the modifier byte in the Input Report. */
-#define SHIFT_KEY_CODE                      0x02                                       /**< Key code indicating the press of the Shift Key. */
-#define BASE_USB_HID_SPEC_VERSION           0x0101                                     /**< Version number of base USB HID Specification implemented by this application. */
-#define OUTPUT_REPORT_INDEX                 0                                          /**< Index of Output Report. */
-#define OUTPUT_REPORT_MAX_LEN               1                                          /**< Maximum length of Output Report. */
-#define INPUT_REPORT_KEYS_INDEX             0                                          /**< Index of Input Report. */
-#define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       /**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
-#define INPUT_REP_REF_ID                    0                                          /**< Id of reference to Keyboard Input Report. */
-#define OUTPUT_REP_REF_ID                   0                                          /**< Id of reference to Keyboard Output Report. */
+#define MAX_BUFFER_ENTRIES                  5                                           /**< Number of elements that can be enqueued */
 
-BLE_HIDS_DEF(m_hids,                                                /**< Structure used to identify the HID service. */
+/** Abstracts buffer element */
+typedef struct hid_key_buffer
+{
+    uint8_t      data_offset; /**< Max Data that can be buffered for all entries */
+    uint8_t      data_len;    /**< Total length of data */
+    uint8_t    * p_data;      /**< Scanned key pattern */
+    ble_hids_t * p_instance;  /**< Identifies peer and service instance */
+} buffer_entry_t;
+
+STATIC_ASSERT(sizeof(buffer_entry_t) % 4 == 0);
+
+/** Circular buffer list */
+typedef struct
+{
+    buffer_entry_t buffer[MAX_BUFFER_ENTRIES]; /**< Maximum number of entries that can enqueued in the list */
+    uint8_t        rp;                         /**< Index to the read location */
+    uint8_t        wp;                         /**< Index to write location */
+    uint8_t        count;                      /**< Number of elements in the list */
+} buffer_list_t;
+
+/** Provide status of data list is full or not */
+#define BUFFER_LIST_FULL() \
+    ((MAX_BUFFER_ENTRIES == buffer_list.count - 1) ? true : false)
+		
+/**Buffer queue access macros
+ *
+ * @{ */
+/* Initialization of buffer list */
+#define BUFFER_LIST_INIT()     \
+    do                         \
+    {                          \
+        buffer_list.rp    = 0; \
+        buffer_list.wp    = 0; \
+        buffer_list.count = 0; \
+    } while (0)
+	
+/** Provide status of data list is full or not */
+#define BUFFER_LIST_FULL() \
+    ((MAX_BUFFER_ENTRIES == buffer_list.count - 1) ? true : false)
+
+/** Provides status of buffer list is empty or not */
+#define BUFFER_LIST_EMPTY() \
+    ((0 == buffer_list.count) ? true : false)
+
+#define BUFFER_ELEMENT_INIT(i)                 \
+    do                                         \
+    {                                          \
+        buffer_list.buffer[(i)].p_data = NULL; \
+    } while (0)
+/** @} */
+	
+static uint8_t report_map_data[] =
+{
+    0x05, 0x01,       // Usage Page (Generic Desktop)
+    0x09, 0x06,       // Usage (Keyboard)
+    0xA1, 0x01,       // Collection (Application)
+    0x05, 0x07,       // Usage Page (Key Codes)
+    0x19, 0xe0,       // Usage Minimum (224)
+    0x29, 0xe7,       // Usage Maximum (231)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x25, 0x01,       // Logical Maximum (1)
+    0x75, 0x01,       // Report Size (1)
+    0x95, 0x08,       // Report Count (8)
+    0x81, 0x02,       // Input (Data, Variable, Absolute)
+
+    0x95, 0x01,       // Report Count (1)
+    0x75, 0x08,       // Report Size (8)
+    0x81, 0x01,       // Input (Constant) reserved byte(1)
+
+    0x95, 0x05,       // Report Count (5)
+    0x75, 0x01,       // Report Size (1)
+    0x05, 0x08,       // Usage Page (Page# for LEDs)
+    0x19, 0x01,       // Usage Minimum (1)
+    0x29, 0x05,       // Usage Maximum (5)
+    0x91, 0x02,       // Output (Data, Variable, Absolute), Led report
+    0x95, 0x01,       // Report Count (1)
+    0x75, 0x03,       // Report Size (3)
+    0x91, 0x01,       // Output (Data, Variable, Absolute), Led report padding
+
+    0x95, 0x06,       // Report Count (6)
+    0x75, 0x08,       // Report Size (8)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x25, 0x65,       // Logical Maximum (101)
+    0x05, 0x07,       // Usage Page (Key codes)
+    0x19, 0x00,       // Usage Minimum (0)
+    0x29, 0x65,       // Usage Maximum (101)
+    0x81, 0x00,       // Input (Data, Array) Key array(6 bytes)
+
+    0x09, 0x05,       // Usage (Vendor Defined)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x26, 0xFF, 0x00, // Logical Maximum (255)
+    0x75, 0x08,       // Report Count (2)
+    0x95, 0x02,       // Report Size (8 bit)
+    0xB1, 0x02,       // Feature (Data, Variable, Absolute)
+
+    0xC0              // End Collection (Application)
+};
+
+BLE_HIDS_DEF(m_hids,                                                					/**< Structure used to identify the HID service. */
              NRF_SDH_BLE_TOTAL_LINK_COUNT,
              INPUT_REPORT_KEYS_MAX_LEN,
              OUTPUT_REPORT_MAX_LEN);
 			 
-bool              		 m_in_boot_mode = false;               		/**< Current protocol mode. */
-static buffer_list_t     buffer_list;                               /**< List to enqueue not just data to be sent, but also related information like the handle, connection handle etc */
+bool              			m_in_boot_mode = false;               						/**< Current protocol mode. */
+static buffer_list_t     	buffer_list;                               					/**< List to enqueue not just data to be sent, but also related information like the handle, connection handle etc */
 
-extern uint16_t 			m_conn_handle;
-extern bool              	m_caps_on;  
-
-static uint8_t m_caps_on_key_scan_str[] = /**< Key pattern to be sent when the output report has been written with the CAPS LOCK bit set. */
+static uint8_t m_caps_on_key_scan_str[] = 												/**< Key pattern to be sent when the output report has been written with the CAPS LOCK bit set. */
 {
     0x06,       /* Key C */
     0x04,       /* Key a */
@@ -37,7 +134,7 @@ static uint8_t m_caps_on_key_scan_str[] = /**< Key pattern to be sent when the o
     0x11,       /* Key n */
 };
 
-static uint8_t m_caps_off_key_scan_str[] = /**< Key pattern to be sent when the output report has been written with the CAPS LOCK bit cleared. */
+static uint8_t m_caps_off_key_scan_str[] = 												/**< Key pattern to be sent when the output report has been written with the CAPS LOCK bit cleared. */
 {
     0x06,       /* Key C */
     0x04,       /* Key a */
@@ -46,6 +143,64 @@ static uint8_t m_caps_off_key_scan_str[] = /**< Key pattern to be sent when the 
     0x12,       /* Key o */
     0x09,       /* Key f */
 };
+
+extern uint16_t 			m_conn_handle;
+extern bool              	m_caps_on;  
+
+
+/**@brief Function for handling the HID Report Characteristic Write event.
+ *
+ * @param[in]   p_evt   HID service event.
+ */
+static void on_hid_rep_char_write(ble_hids_evt_t * p_evt)
+{
+    if (p_evt->params.char_write.char_id.rep_type == BLE_HIDS_REP_TYPE_OUTPUT)
+    {
+        ret_code_t err_code;
+        uint8_t  report_val;
+        uint8_t  report_index = p_evt->params.char_write.char_id.rep_index;
+
+        if (report_index == OUTPUT_REPORT_INDEX)
+        {
+            // This code assumes that the output report is one byte long. Hence the following
+            // static assert is made.
+            STATIC_ASSERT(OUTPUT_REPORT_MAX_LEN == 1);
+
+            err_code = ble_hids_outp_rep_get(&m_hids,
+                                             report_index,
+                                             OUTPUT_REPORT_MAX_LEN,
+                                             0,
+                                             m_conn_handle,
+                                             &report_val);
+            APP_ERROR_CHECK(err_code);
+
+            if (!m_caps_on && ((report_val & OUTPUT_REPORT_BIT_MASK_CAPS_LOCK) != 0))
+            {
+                // Caps Lock is turned On.
+                NRF_LOG_INFO("Caps Lock is turned On!");
+                err_code = bsp_indication_set(BSP_INDICATE_ALERT_3);
+                APP_ERROR_CHECK(err_code);
+
+                keys_send(sizeof(m_caps_on_key_scan_str), m_caps_on_key_scan_str);
+                m_caps_on = true;
+            }
+            else if (m_caps_on && ((report_val & OUTPUT_REPORT_BIT_MASK_CAPS_LOCK) == 0))
+            {
+                // Caps Lock is turned Off .
+                NRF_LOG_INFO("Caps Lock is turned Off!");
+                err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
+                APP_ERROR_CHECK(err_code);
+
+                keys_send(sizeof(m_caps_off_key_scan_str), m_caps_off_key_scan_str);
+                m_caps_on = false;
+            }
+            else
+            {
+                // The report received is not supported by this application. Do nothing.
+            }
+        }
+    }
+}
 
 /**@brief Function for handling HID events.
  *
@@ -103,52 +258,7 @@ void hids_init(void)
 
     static ble_hids_inp_rep_init_t  input_report_array[1];
     static ble_hids_outp_rep_init_t output_report_array[1];
-    static uint8_t                  report_map_data[] =
-    {
-        0x05, 0x01,       // Usage Page (Generic Desktop)
-        0x09, 0x06,       // Usage (Keyboard)
-        0xA1, 0x01,       // Collection (Application)
-        0x05, 0x07,       // Usage Page (Key Codes)
-        0x19, 0xe0,       // Usage Minimum (224)
-        0x29, 0xe7,       // Usage Maximum (231)
-        0x15, 0x00,       // Logical Minimum (0)
-        0x25, 0x01,       // Logical Maximum (1)
-        0x75, 0x01,       // Report Size (1)
-        0x95, 0x08,       // Report Count (8)
-        0x81, 0x02,       // Input (Data, Variable, Absolute)
-
-        0x95, 0x01,       // Report Count (1)
-        0x75, 0x08,       // Report Size (8)
-        0x81, 0x01,       // Input (Constant) reserved byte(1)
-
-        0x95, 0x05,       // Report Count (5)
-        0x75, 0x01,       // Report Size (1)
-        0x05, 0x08,       // Usage Page (Page# for LEDs)
-        0x19, 0x01,       // Usage Minimum (1)
-        0x29, 0x05,       // Usage Maximum (5)
-        0x91, 0x02,       // Output (Data, Variable, Absolute), Led report
-        0x95, 0x01,       // Report Count (1)
-        0x75, 0x03,       // Report Size (3)
-        0x91, 0x01,       // Output (Data, Variable, Absolute), Led report padding
-
-        0x95, 0x06,       // Report Count (6)
-        0x75, 0x08,       // Report Size (8)
-        0x15, 0x00,       // Logical Minimum (0)
-        0x25, 0x65,       // Logical Maximum (101)
-        0x05, 0x07,       // Usage Page (Key codes)
-        0x19, 0x00,       // Usage Minimum (0)
-        0x29, 0x65,       // Usage Maximum (101)
-        0x81, 0x00,       // Input (Data, Array) Key array(6 bytes)
-
-        0x09, 0x05,       // Usage (Vendor Defined)
-        0x15, 0x00,       // Logical Minimum (0)
-        0x26, 0xFF, 0x00, // Logical Maximum (255)
-        0x75, 0x08,       // Report Count (2)
-        0x95, 0x02,       // Report Size (8 bit)
-        0xB1, 0x02,       // Feature (Data, Variable, Absolute)
-
-        0xC0              // End Collection (Application)
-    };
+    
 
     memset((void *)input_report_array, 0, sizeof(ble_hids_inp_rep_init_t));
     memset((void *)output_report_array, 0, sizeof(ble_hids_outp_rep_init_t));
@@ -476,59 +586,5 @@ void keys_send(uint8_t key_pattern_len, uint8_t * p_key_pattern)
        )
     {
         APP_ERROR_HANDLER(err_code);
-    }
-}
-
-/**@brief Function for handling the HID Report Characteristic Write event.
- *
- * @param[in]   p_evt   HID service event.
- */
-void on_hid_rep_char_write(ble_hids_evt_t * p_evt)
-{
-    if (p_evt->params.char_write.char_id.rep_type == BLE_HIDS_REP_TYPE_OUTPUT)
-    {
-        ret_code_t err_code;
-        uint8_t  report_val;
-        uint8_t  report_index = p_evt->params.char_write.char_id.rep_index;
-
-        if (report_index == OUTPUT_REPORT_INDEX)
-        {
-            // This code assumes that the output report is one byte long. Hence the following
-            // static assert is made.
-            STATIC_ASSERT(OUTPUT_REPORT_MAX_LEN == 1);
-
-            err_code = ble_hids_outp_rep_get(&m_hids,
-                                             report_index,
-                                             OUTPUT_REPORT_MAX_LEN,
-                                             0,
-                                             m_conn_handle,
-                                             &report_val);
-            APP_ERROR_CHECK(err_code);
-
-            if (!m_caps_on && ((report_val & OUTPUT_REPORT_BIT_MASK_CAPS_LOCK) != 0))
-            {
-                // Caps Lock is turned On.
-                NRF_LOG_INFO("Caps Lock is turned On!");
-                err_code = bsp_indication_set(BSP_INDICATE_ALERT_3);
-                APP_ERROR_CHECK(err_code);
-
-                keys_send(sizeof(m_caps_on_key_scan_str), m_caps_on_key_scan_str);
-                m_caps_on = true;
-            }
-            else if (m_caps_on && ((report_val & OUTPUT_REPORT_BIT_MASK_CAPS_LOCK) == 0))
-            {
-                // Caps Lock is turned Off .
-                NRF_LOG_INFO("Caps Lock is turned Off!");
-                err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
-                APP_ERROR_CHECK(err_code);
-
-                keys_send(sizeof(m_caps_off_key_scan_str), m_caps_off_key_scan_str);
-                m_caps_on = false;
-            }
-            else
-            {
-                // The report received is not supported by this application. Do nothing.
-            }
-        }
     }
 }

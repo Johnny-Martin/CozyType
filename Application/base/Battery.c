@@ -2,25 +2,26 @@
 
 #include "ble_bas.h"
 #include "ble_dis.h"
+#include "bsp_btn_ble.h"
 #include "sensorsim.h"
 #include "nrf_pwr_mgmt.h"
 #include "app_error.h"
 #include "app_timer.h"
 
-#define BATTERY_LEVEL_MEAS_INTERVAL         APP_TIMER_TICKS(2000)                      /**< Battery level measurement interval (ticks). */
-#define MIN_BATTERY_LEVEL                   81                                         /**< Minimum simulated battery level. */
-#define MAX_BATTERY_LEVEL                   100                                        /**< Maximum simulated battery level. */
-#define BATTERY_LEVEL_INCREMENT             1                                          /**< Increment between each simulated battery level measurement. */
+#define BATTERY_LEVEL_MEAS_INTERVAL         APP_TIMER_TICKS(2000)                      	/**< Battery level measurement interval (ticks). */
+#define MIN_BATTERY_LEVEL                   81                                         	/**< Minimum simulated battery level. */
+#define MAX_BATTERY_LEVEL                   100                                        	/**< Maximum simulated battery level. */
+#define BATTERY_LEVEL_INCREMENT             1                                          	/**< Increment between each simulated battery level measurement. */
 
 BLE_BAS_DEF(m_bas);
 
-static sensorsim_cfg_t   m_battery_sim_cfg;                         /**< Battery Level sensor simulator configuration. */
-static sensorsim_state_t m_battery_sim_state;                       /**< Battery Level sensor simulator state. */
-APP_TIMER_DEF(m_battery_timer_id);                                  /**< Battery timer. */
+static sensorsim_cfg_t   m_battery_sim_cfg;                         					/**< Battery Level sensor simulator configuration. */
+static sensorsim_state_t m_battery_sim_state;                       					/**< Battery Level sensor simulator state. */
+APP_TIMER_DEF(m_battery_timer_id);                                  					/**< Battery timer. */
 
 /**@brief Function for performing a battery measurement, and update the Battery Level characteristic in the Battery Service.
  */
-void battery_level_update(void)
+static void battery_level_update(void)
 {
     ret_code_t err_code;
     uint8_t  battery_level;
@@ -48,7 +49,7 @@ void battery_level_update(void)
  * @param[in]   p_context   Pointer used for passing some arbitrary information (context) from the
  *                          app_start_timer() call to the timeout handler.
  */
-void battery_level_meas_timeout_handler(void * p_context)
+static void battery_level_meas_timeout_handler(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
     battery_level_update();
@@ -78,7 +79,6 @@ void bas_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
 /**@brief Function for initializing the battery sensor simulator.
  */
 void sensor_simulator_init(void)
@@ -91,34 +91,31 @@ void sensor_simulator_init(void)
     sensorsim_init(&m_battery_sim_state, &m_battery_sim_cfg);
 }
 
-
 /**@brief Function for putting the chip into sleep mode.
  *
  * @note This function will not return.
  */
 void sleep_mode_enter(void)
 {
-    //ret_code_t err_code;
+    ret_code_t err_code;
 
-    //err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    //APP_ERROR_CHECK(err_code);
+    err_code = bsp_indication_set(BSP_INDICATE_IDLE);
+    APP_ERROR_CHECK(err_code);
 
     // Prepare wakeup buttons.
-    //err_code = bsp_btn_ble_sleep_mode_prepare();
-    //APP_ERROR_CHECK(err_code);
+    err_code = bsp_btn_ble_sleep_mode_prepare();
+    APP_ERROR_CHECK(err_code);
 
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
-    //err_code = sd_power_system_off();
-    //APP_ERROR_CHECK(err_code);
+    err_code = sd_power_system_off();
+    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for initializing power management.
  */
 void power_management_init(void)
 {
-    ret_code_t err_code;
-    err_code = nrf_pwr_mgmt_init();
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(nrf_pwr_mgmt_init());
 }
 /**@brief Function for creating battery timer after the timer has been initialized.
  */

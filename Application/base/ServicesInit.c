@@ -56,7 +56,6 @@ void scheduler_init(void)
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 }
 
-
 /**@brief Function for initializing the nrf log module.
  */
 void log_init(void)
@@ -75,10 +74,10 @@ void timers_init(void)
     APP_ERROR_CHECK(app_timer_init());
 }
 
-/**@brief Function for the GPIO initialization.
+/**@brief Function for the GPIOTE initialization.
  *
- * @details Initializes the GPIO module.
- * @warning you'd better invoke this function at the begining of main
+ * @details Initializes the GPIOTE module.
+ * @warning you'd better invoke this function at the begining of main function
  */
 void gpiote_init(void)
 {
@@ -157,6 +156,5 @@ void gap_params_init(void)
  */
 void gatt_init(void)
 {
-    ret_code_t err_code = nrf_ble_gatt_init(&m_gatt, NULL);
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(nrf_ble_gatt_init(&m_gatt, NULL));
 }
