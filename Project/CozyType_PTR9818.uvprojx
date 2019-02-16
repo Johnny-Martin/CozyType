@@ -402,9 +402,9 @@
               <FilePath>..\Application\base\ServicesInit.c</FilePath>
             </File>
             <File>
-              <FileName>HID.c</FileName>
+              <FileName>HIDService.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\base\HID.c</FilePath>
+              <FilePath>..\Application\base\HIDService.c</FilePath>
             </File>
             <File>
               <FileName>BLEConnector.c</FileName>
@@ -415,11 +415,6 @@
               <FileName>LED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
-            </File>
-            <File>
-              <FileName>_BSP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\_BSP.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4745,9 +4740,9 @@
               <FilePath>..\Application\base\ServicesInit.c</FilePath>
             </File>
             <File>
-              <FileName>HID.c</FileName>
+              <FileName>HIDService.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\base\HID.c</FilePath>
+              <FilePath>..\Application\base\HIDService.c</FilePath>
             </File>
             <File>
               <FileName>BLEConnector.c</FileName>
@@ -4758,11 +4753,6 @@
               <FileName>LED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
-            </File>
-            <File>
-              <FileName>_BSP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\base\_BSP.c</FilePath>
             </File>
           </Files>
         </Group>

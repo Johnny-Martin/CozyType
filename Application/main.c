@@ -43,14 +43,6 @@
  * @{
  * @ingroup ble_sdk_app_hids_keyboard
  * @brief HID Keyboard Sample Application main file.
- *
- * This file contains is the source code for a sample application using the HID, Battery and Device
- * Information Services for implementing a simple keyboard functionality.
- * Pressing Button 0 will send text 'hello' to the connected peer. On receiving output report,
- * it toggles the state of LED 2 on the mother board based on whether or not Caps Lock is on.
- * This application uses the @ref app_scheduler.
- *
- * Also it would accept pairing requests from any peer device.
  */
 
 #include "app_error.h"
@@ -61,15 +53,11 @@
 
 #include "base\\Battery.h"
 #include "base\\ServicesInit.h"
-#include "base\\HID.h"
+#include "base\\HIDService.h"
 #include "base\\BLEConnector.h"
-#include "base\\_BSP.h"
 #include "LED.h"
 
 #define DEAD_BEEF        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
-
-uint16_t          		 m_conn_handle  = BLE_CONN_HANDLE_INVALID;  /**< Handle of the current connection. */
-bool              		 m_caps_on = false;                         /**< Variable to indicate if Caps Lock is turned on. */
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -87,19 +75,6 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-/**@brief Function for handling the idle state (main loop).
- *
- * @details If there is no pending log operation, then sleep until next the next event occurs.
- */
-static void idle_state_handle(void)
-{
-    app_sched_execute();
-    if (NRF_LOG_PROCESS() == false)
-    {
-        nrf_pwr_mgmt_run();
-    }
-}
-
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -110,21 +85,20 @@ int main(void)
     log_init();
 	gpiote_init();
     timers_init();
-    buttons_leds_init(&erase_bonds);
+    //--buttons_leds_init(&erase_bonds);
     power_management_init();
     ble_stack_init();
     scheduler_init();
     gap_params_init();
     gatt_init();
     advertising_init();
-	
 				qwr_init();
 				dis_init();
 				bas_init();
-				hids_init();
+				hid_init();
     sensor_simulator_init();
     conn_params_init();
-    buffer_init();
+    //--buffer_init();
     peer_manager_init();
 
 	ppi_init();
@@ -139,15 +113,18 @@ int main(void)
 	init_led_beacon();
 	init_led_gpiote();
     // Enter main loop.
-    for (;;)
-    {
+    while(true){
 		//led_red(true);
 		//led_green(true);
 		//led_logic();
-        idle_state_handle();
+		
+		//If there is no pending log operation, then sleep until next the next event occurs.
+        app_sched_execute();
+		if (NRF_LOG_PROCESS() == false){
+			nrf_pwr_mgmt_run();
+		}
     }
 }
-
 
 /**
  * @}

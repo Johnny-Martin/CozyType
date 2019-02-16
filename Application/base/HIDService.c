@@ -1,8 +1,7 @@
-#include "BLE_HID.h"
+#include "HIDService.h"
 
 #include "app_error.h"
 #include "nrf_log.h"
-#include "bsp.h"
 
 #define MODIFIER_KEY_POS                    0                                          	/**< Position of the modifier byte in the Input Report. */
 #define BASE_USB_HID_SPEC_VERSION           0x0101                                     	/**< Version number of base USB HID Specification implemented by this application. */
@@ -203,9 +202,9 @@ void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier){
 	data[MODIFIER_KEY_POS] = modifier;
 	
 	if (!m_in_boot_mode){
-		err_code = ble_hids_inp_rep_send(m_hids, INPUT_REPORT_KEYS_INDEX, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
+		err_code = ble_hids_inp_rep_send(&m_hids, INPUT_REPORT_KEYS_INDEX, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
 	}else{
-		err_code = ble_hids_boot_kb_inp_rep_send(m_hids, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
+		err_code = ble_hids_boot_kb_inp_rep_send(&m_hids, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
     }
 
 	if ((err_code != NRF_SUCCESS) &&
