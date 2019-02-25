@@ -115,6 +115,7 @@ void advertising_start(bool erase_bonds)
 
         ret = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
         APP_ERROR_CHECK(ret);
+		NRF_LOG_INFO("ble advertising started.");
     }
 }
 
@@ -176,6 +177,7 @@ static void pm_evt_handler(pm_evt_t const * p_evt)
 
         case PM_EVT_PEERS_DELETE_SUCCEEDED:
         {
+			NRF_LOG_INFO("pm_evt_handler, p_evt->evt_id == PM_EVT_PEERS_DELETE_SUCCEEDED");
             advertising_start(false);
         } break;
 
@@ -258,42 +260,31 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     {
         case BLE_ADV_EVT_DIRECTED_HIGH_DUTY:
             NRF_LOG_INFO("High Duty Directed advertising.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_DIRECTED:
             NRF_LOG_INFO("Directed advertising.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_FAST:
             NRF_LOG_INFO("Fast advertising.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW:
             NRF_LOG_INFO("Slow advertising.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_SLOW);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_FAST_WHITELIST:
             NRF_LOG_INFO("Fast advertising with whitelist.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW_WHITELIST:
             NRF_LOG_INFO("Slow advertising with whitelist.");
-            //--err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            //APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_IDLE:
-            sleep_mode_enter();
+			NRF_LOG_INFO("BLE_ADV_EVT_IDLE -> sleep_mode_enter(removed)");
+            //sleep_mode_enter();
             break;
 
         case BLE_ADV_EVT_WHITELIST_REQUEST:
@@ -457,8 +448,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected");
-            //--err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            //--APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
@@ -466,17 +455,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected");
-            // Dequeue all keys without transmission.
-            //--(void) buffer_dequeue(false);
-
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
-
-            // Reset m_caps_on variable. Upon reconnect, the HID host will re-send the Output
-            // report containing the Caps lock state.
-            //--m_caps_on = false;
-            // disabling alert 3. signal - used for capslock ON
-            //--err_code = bsp_indication_set(BSP_INDICATE_ALERT_OFF);
-            //--APP_ERROR_CHECK(err_code);
 
             break; // BLE_GAP_EVT_DISCONNECTED
 
@@ -493,8 +472,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         } break;
 
         case BLE_GATTS_EVT_HVN_TX_COMPLETE:
-            // Send next key event
-            //--(void) buffer_dequeue(true);
             break;
 
         case BLE_GATTC_EVT_TIMEOUT:

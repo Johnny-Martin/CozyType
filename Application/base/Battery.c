@@ -2,7 +2,6 @@
 
 #include "ble_bas.h"
 #include "ble_dis.h"
-#include "bsp_btn_ble.h"
 #include "sensorsim.h"
 #include "nrf_pwr_mgmt.h"
 #include "app_error.h"
@@ -94,7 +93,9 @@ void sensor_simulator_init(void)
 /**@brief Function for putting the chip into sleep mode.
  *
  * @note This function will not return.
- */
+
+#include "bsp_btn_ble.h"
+
 void sleep_mode_enter(void)
 {
     ret_code_t err_code;
@@ -110,6 +111,7 @@ void sleep_mode_enter(void)
     err_code = sd_power_system_off();
     APP_ERROR_CHECK(err_code);
 }
+ */
 
 /**@brief Function for initializing power management.
  */
