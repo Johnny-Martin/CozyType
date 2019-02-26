@@ -1,13 +1,25 @@
 #include "HIDService.h"
-
 #include "app_error.h"
 #include "nrf_log.h"
+
+#define REPORT_ID_KEYBOARD                  0x01                                       	/**< Position of the modifier byte in the Input Report. */
+#define REPORT_ID_MOUSE                   	0x02                                        /**< Position of the modifier byte in the Input Report. */
+
+#define INPUT_REPORT_KEYS_MAX_LEN           8                                          	/**< Maximum length of the Input Report characteristic. */
+#define SCAN_CODE_POS_BOOT_MODE             2                                          	/**< The start position of the key scan code in a HID Report. */
+#define SCAN_CODE_POS_REPORT_MODE           3                                          	/**< The start position of the key scan code in a HID Report. */
+#define KEYS_SIZE_REPORT_MODE	            5                                          	/**< The start position of the key scan code in a HID Report. */
+#define KEYS_SIZE_BOOT_MODE	 	            6                                          	/**< The start position of the key scan code in a HID Report. */
+
+
 
 #define MODIFIER_KEY_POS                    0                                          	/**< Position of the modifier byte in the Input Report. */
 #define BASE_USB_HID_SPEC_VERSION           0x0101                                     	/**< Version number of base USB HID Specification implemented by this application. */
 #define OUTPUT_REPORT_INDEX                 0                                          	/**< Index of Output Report. */
 #define OUTPUT_REPORT_MAX_LEN               1                                          	/**< Maximum length of Output Report. */
 #define INPUT_REPORT_KEYS_INDEX             0                                          	/**< Index of Input Report. */
+#define INPUT_REPORT_MOUSE_INDEX            0                                          	/**< Index of Input Report. */
+#define INPUT_REPORT_MOUSE             		1                                          	/**< Index of Input Report. */
 #define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       	/**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
 #define INPUT_REP_REF_ID                    0                                          	/**< Id of reference to Keyboard Input Report. */
 #define OUTPUT_REP_REF_ID                   0                                          	/**< Id of reference to Keyboard Output Report. */
@@ -24,7 +36,7 @@ BLE_HIDS_DEF(m_hids,                                                					/**< St
 //do not know how to send HID mouse report with REPORT_ID 0x02
 //send the keyboard report with REPORT_ID 0x01, we should send the ID at the
 //begin of the data array, then modifier key, then reserved byte, then 5 scan keys.
-/*
+
 static uint8_t keyboard_mouse_report_map_data[] = {
  //45 47
    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
@@ -82,8 +94,7 @@ static uint8_t keyboard_mouse_report_map_data[] = {
    0xC0,                          //   END_COLLECTION
    0xC0,                     	  // END COLLECTION   
 };
-*/
-
+/*
 static uint8_t report_map_data[] =
 {
     0x05, 0x01,       // Usage Page (Generic Desktop)
@@ -130,7 +141,7 @@ static uint8_t report_map_data[] =
 
     0xC0              // End Collection (Application)
 };
-
+*/
 /**@brief Function for handling HID events.
  *
  * @details This function will be called for all HID events which are passed to the application.
@@ -183,16 +194,16 @@ void hid_init(void){
     ble_hids_outp_rep_init_t * p_output_report;
     uint8_t                    hid_info_flags;
 
-    static ble_hids_inp_rep_init_t  input_report_array[1];
+    static ble_hids_inp_rep_init_t  input_report_array[2];
     static ble_hids_outp_rep_init_t output_report_array[1];
 	
-    memset((void *)input_report_array, 0, sizeof(ble_hids_inp_rep_init_t));
-    memset((void *)output_report_array, 0, sizeof(ble_hids_outp_rep_init_t));
+    memset((void *)input_report_array, 0, sizeof(input_report_array));
+    memset((void *)output_report_array, 0, sizeof(output_report_array));
 
-    // Initialize HID Service
+    // Initialize HID keyboard
     p_input_report                      = &input_report_array[INPUT_REPORT_KEYS_INDEX];
     p_input_report->max_len             = INPUT_REPORT_KEYS_MAX_LEN;
-    p_input_report->rep_ref.report_id   = INPUT_REP_REF_ID;
+    p_input_report->rep_ref.report_id   = REPORT_ID_KEYBOARD;
     p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
@@ -207,6 +218,17 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.write_perm);
 
+	// Initialize HID mouse
+	p_input_report                      = &input_report_array[INPUT_REPORT_MOUSE_INDEX];
+    p_input_report->max_len             = 4;//--todo
+    p_input_report->rep_ref.report_id   = REPORT_ID_MOUSE;
+    p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
+	
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
+	
+	
     hid_info_flags = HID_INFO_FLAG_REMOTE_WAKE_MSK | HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK;
 
     memset(&hids_init_obj, 0, sizeof(hids_init_obj));
@@ -214,15 +236,15 @@ void hid_init(void){
     hids_init_obj.evt_handler                    = on_hids_evt;
     hids_init_obj.error_handler                  = service_error_handler;
     hids_init_obj.is_kb                          = true;
-    hids_init_obj.is_mouse                       = false;
-    hids_init_obj.inp_rep_count                  = 1;
+    hids_init_obj.is_mouse                       = true; //--todo??
+    hids_init_obj.inp_rep_count                  = 2;
     hids_init_obj.p_inp_rep_array                = input_report_array;
     hids_init_obj.outp_rep_count                 = 1;
     hids_init_obj.p_outp_rep_array               = output_report_array;
     hids_init_obj.feature_rep_count              = 0;
     hids_init_obj.p_feature_rep_array            = NULL;
-    hids_init_obj.rep_map.data_len               = sizeof(report_map_data);
-    hids_init_obj.rep_map.p_data                 = report_map_data;
+    hids_init_obj.rep_map.data_len               = sizeof(keyboard_mouse_report_map_data);
+    hids_init_obj.rep_map.p_data                 = keyboard_mouse_report_map_data;
     hids_init_obj.hid_information.bcd_hid        = BASE_USB_HID_SPEC_VERSION;
     hids_init_obj.hid_information.b_country_code = 0;
     hids_init_obj.hid_information.flags          = hid_info_flags;
@@ -234,43 +256,28 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.hid_information.security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.hid_information.security_mode.write_perm);
 
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(
-        &hids_init_obj.security_mode_boot_kb_inp_rep.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_inp_rep.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_inp_rep.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.security_mode_boot_kb_inp_rep.write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_outp_rep.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_outp_rep.write_perm);
+
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.write_perm);
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_protocol.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_protocol.write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.security_mode_ctrl_point.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_ctrl_point.write_perm);
 
+	NRF_LOG_INFO("ble_hids_init begin");
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
     APP_ERROR_CHECK(err_code);
+	NRF_LOG_INFO("ble_hids_init end");
 }
 
-/**@brief Function for sending sample key presses to the peer.
- *
- * @param[in]   key_pattern_len   Pattern length.
- * @param[in]   p_key_pattern     Pattern to be sent.
- */
-void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier){
-	ret_code_t err_code;
-    uint8_t  data[INPUT_REPORT_KEYS_MAX_LEN];
-	
-	ASSERT(size <= INPUT_REPORT_KEYS_MAX_LEN - SCAN_CODE_POS);
-	
-	memset(data, 0, sizeof(data));
-	memcpy(data + SCAN_CODE_POS, p_keys, size);
-	data[MODIFIER_KEY_POS] = modifier;
-	
-	if (!m_in_boot_mode){
-		err_code = ble_hids_inp_rep_send(&m_hids, INPUT_REPORT_KEYS_INDEX, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
-	}else{
-		err_code = ble_hids_boot_kb_inp_rep_send(&m_hids, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
-    }
-
+static void handle_error_code(ret_code_t err_code){
 	if ((err_code != NRF_SUCCESS) &&
         (err_code != NRF_ERROR_INVALID_STATE) &&
         (err_code != NRF_ERROR_RESOURCES) &&
@@ -281,3 +288,50 @@ void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier){
         APP_ERROR_HANDLER(err_code);
     }
 }
+/**@brief Function for sending sample key presses to the peer.
+ *
+ * @param[in]   key_pattern_len   Pattern length.
+ * @param[in]   p_key_pattern     Pattern to be sent.
+ */
+void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier){
+	ret_code_t err_code;
+    uint8_t  data[INPUT_REPORT_KEYS_MAX_LEN];
+	
+	ASSERT(size <= INPUT_REPORT_KEYS_MAX_LEN - SCAN_CODE_POS_BOOT_MODE);
+	memset(data, 0, sizeof(data));
+	memcpy(data + SCAN_CODE_POS_BOOT_MODE, p_keys, size);
+	data[0] = modifier;
+	
+	if (m_in_boot_mode){
+		// data[0] = modifier;
+		// memcpy(data + SCAN_CODE_POS_BOOT_MODE, p_keys, size);
+		err_code = ble_hids_boot_kb_inp_rep_send(&m_hids, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
+	}else{
+		// data[0] = REPORT_ID_KEYBOARD;
+		// data[1] = modifier;
+		//if size == 6 in report mode, ignore the last key.
+		// size = size > KEYS_SIZE_REPORT_MODE ? KEYS_SIZE_REPORT_MODE : size;
+		// memcpy(data + SCAN_CODE_POS_REPORT_MODE, p_keys, size);
+		
+		err_code = ble_hids_inp_rep_send(&m_hids, 0, INPUT_REPORT_KEYS_MAX_LEN, data, m_conn_handle);
+	}
+
+	handle_error_code(err_code);
+}
+
+void send_mouse_movement(int8_t x_delta, int8_t y_delta){
+	 ret_code_t err_code;
+
+    if (m_in_boot_mode){
+		err_code = ble_hids_boot_mouse_inp_rep_send(&m_hids, 0x00, x_delta, y_delta, 0, NULL, m_conn_handle);
+	}else{
+        //uint8_t buffer[4];
+        //err_code = ble_hids_inp_rep_send(&m_hids, 1, INPUT_REP_MOVEMENT_LEN, buffer, m_conn_handle);
+    }
+	
+	handle_error_code(err_code);
+}
+
+// void send_mouse_buttons(int8_t buttons, int8_t media_btns){
+	
+// }

@@ -3,9 +3,6 @@
 
 #include "ble_hids.h"
 
-#define SCAN_CODE_POS                       2                                          	/**< The start position of the key scan code in a HID Report. */
-#define INPUT_REPORT_KEYS_MAX_LEN           8                                          	/**< Maximum length of the Input Report characteristic. */
-
 /**@brief Function for initializing HID Service.
  */
 void hid_init(void);
