@@ -85,7 +85,6 @@ int main(void)
     log_init();
 	gpiote_init();
     timers_init();
-    //--buttons_leds_init(&erase_bonds);
     power_management_init();
     ble_stack_init();
     scheduler_init();
@@ -98,7 +97,6 @@ int main(void)
 				hid_init();
     sensor_simulator_init();
     conn_params_init();
-    //--buffer_init();
     peer_manager_init();
 
 	ppi_init();
