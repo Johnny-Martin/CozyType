@@ -16,7 +16,7 @@ void sensor_simulator_init(void);
  *
  * @note This function will not return.
  */
-void sleep_mode_enter(void);
+// void sleep_mode_enter(void);
 
 /**@brief Function for initializing power management.
  */
