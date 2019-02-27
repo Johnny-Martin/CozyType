@@ -18,7 +18,7 @@
 #define OUTPUT_REPORT_INDEX                 0                                          	/**< Index of Output Report. */
 #define OUTPUT_REPORT_MAX_LEN               1                                          	/**< Maximum length of Output Report. */
 #define INPUT_REPORT_KEYS_INDEX             0                                          	/**< Index of Input Report. */
-#define INPUT_REPORT_MOUSE_INDEX            0                                          	/**< Index of Input Report. */
+#define INPUT_REPORT_MOUSE_INDEX            1                                          	/**< Index of Input Report. */
 #define INPUT_REPORT_MOUSE             		1                                          	/**< Index of Input Report. */
 #define OUTPUT_REPORT_BIT_MASK_CAPS_LOCK    0x02                                       	/**< CAPS LOCK bit in Output Report (based on 'LED Page (0x08)' of the Universal Serial Bus HID Usage Tables). */
 #define INPUT_REP_REF_ID                    0                                          	/**< Id of reference to Keyboard Input Report. */
@@ -44,6 +44,7 @@ static uint8_t keyboard_mouse_report_map_data[] = {
    0xa1, 0x01,                    // COLLECTION (Application)
    0x85, REPORT_ID_KEYBOARD,      //   REPORT_ID (1)
    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+	
    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
@@ -51,9 +52,11 @@ static uint8_t keyboard_mouse_report_map_data[] = {
    0x95, 0x08,                    //   REPORT_COUNT (8)
    0x75, 0x01,                    //   REPORT_SIZE (1)
    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+	
    0x95, 0x01,                    //   REPORT_COUNT (1)
    0x75, 0x08,                    //   REPORT_SIZE (8)
    0x81, 0x01,                    //   INPUT (Cnst,Ary,Abs)
+	
    0x95, 0x05,                    //   REPORT_COUNT (6)
    0x75, 0x08,                    //   REPORT_SIZE (8)
    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
@@ -62,6 +65,24 @@ static uint8_t keyboard_mouse_report_map_data[] = {
    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+   
+   0x95, 0x05,       			  //   Report Count (5)
+   0x75, 0x01,       			  //   Report Size (1)
+   0x05, 0x08,       			  //   Usage Page (Page# for LEDs)
+   0x19, 0x01,       			  //   Usage Minimum (1)
+   0x29, 0x05,       			  //   Usage Maximum (5)
+   0x91, 0x02,       			  //   Output (Data, Variable, Absolute), Led report
+   0x95, 0x01,       			  //   Report Count (1)
+   0x75, 0x03,       			  //   Report Size (3)
+   0x91, 0x01,       			  //   Output (Data, Variable, Absolute), Led report padding
+									   
+   0x09, 0x05,       			  //   Usage (Vendor Defined)
+   0x15, 0x00,       			  //   Logical Minimum (0)
+   0x26, 0xFF, 0x00, 			  //   Logical Maximum (255)
+   0x75, 0x08,       			  //   Report Count (2)
+   0x95, 0x02,       			  //   Report Size (8 bit)
+   0xB1, 0x02,       			  //   Feature (Data, Variable, Absolute)
+
    0xc0,                          // END_COLLECTION
    
    //52 54
@@ -236,7 +257,7 @@ void hid_init(void){
     hids_init_obj.evt_handler                    = on_hids_evt;
     hids_init_obj.error_handler                  = service_error_handler;
     hids_init_obj.is_kb                          = true;
-    hids_init_obj.is_mouse                       = true; //--todo??
+    hids_init_obj.is_mouse                       = true;
     hids_init_obj.inp_rep_count                  = 2;
     hids_init_obj.p_inp_rep_array                = input_report_array;
     hids_init_obj.outp_rep_count                 = 1;
