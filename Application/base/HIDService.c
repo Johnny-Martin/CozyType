@@ -27,39 +27,58 @@ BLE_HIDS_DEF(m_hids,                                                					/**< St
 //do not know how to send HID mouse report with REPORT_ID 0x02
 //send the keyboard report with REPORT_ID 0x01, we should send the ID at the
 //begin of the data array, then modifier key, then reserved byte, then 5 scan keys.
-/*
-static uint8_t keyboard_mouse_report_map_data[] = {
+
+static uint8_t report_map_data2[] = {
  //45 47
    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
    0x09, 0x06,                    // USAGE (Keyboard)
    0xa1, 0x01,                    // COLLECTION (Application)
-   0x85, REPORT_ID_KEYBOARD,      //   REPORT_ID (1)
-   0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-   0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
-   0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
-   0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-   0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-   0x95, 0x08,                    //   REPORT_COUNT (8)
-   0x75, 0x01,                    //   REPORT_SIZE (1)
-   0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-   0x95, 0x01,                    //   REPORT_COUNT (1)
-   0x75, 0x08,                    //   REPORT_SIZE (8)
-   0x81, 0x01,                    //   INPUT (Cnst,Ary,Abs)
-   0x95, 0x05,                    //   REPORT_COUNT (6)
-   0x75, 0x08,                    //   REPORT_SIZE (8)
-   0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-   0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
-   0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-   0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
-   0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
-   0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+   0x85, 0x01,      			  //   REPORT_ID (1)
+    0x05, 0x07,       // Usage Page (Key Codes)
+    0x19, 0xe0,       // Usage Minimum (224)
+    0x29, 0xe7,       // Usage Maximum (231)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x25, 0x01,       // Logical Maximum (1)
+    0x75, 0x01,       // Report Size (1)
+    0x95, 0x08,       // Report Count (8)
+    0x81, 0x02,       // Input (Data, Variable, Absolute)
+
+    0x95, 0x01,       // Report Count (1)
+    0x75, 0x08,       // Report Size (8)
+    0x81, 0x01,       // Input (Constant) reserved byte(1)
+
+    0x95, 0x05,       // Report Count (5)
+    0x75, 0x01,       // Report Size (1)
+    0x05, 0x08,       // Usage Page (Page# for LEDs)
+    0x19, 0x01,       // Usage Minimum (1)
+    0x29, 0x05,       // Usage Maximum (5)
+    0x91, 0x02,       // Output (Data, Variable, Absolute), Led report
+    0x95, 0x01,       // Report Count (1)
+    0x75, 0x03,       // Report Size (3)
+    0x91, 0x01,       // Output (Data, Variable, Absolute), Led report padding
+
+    0x95, 0x06,       // Report Count (6)
+    0x75, 0x08,       // Report Size (8)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x25, 0x65,       // Logical Maximum (101)
+    0x05, 0x07,       // Usage Page (Key codes)
+    0x19, 0x00,       // Usage Minimum (0)
+    0x29, 0x65,       // Usage Maximum (101)
+    0x81, 0x00,       // Input (Data, Array) Key array(6 bytes)
+
+    0x09, 0x05,       // Usage (Vendor Defined)
+    0x15, 0x00,       // Logical Minimum (0)
+    0x26, 0xFF, 0x00, // Logical Maximum (255)
+    0x75, 0x08,       // Report Count (2)
+    0x95, 0x02,       // Report Size (8 bit)
+    0xB1, 0x02,       // Feature (Data, Variable, Absolute)
    0xc0,                          // END_COLLECTION
    
    //52 54
-   0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+   //0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
    0x09, 0x02,                    // USAGE (Mouse)
    0xa1, 0x01,                    // COLLECTION (Application)
-   0x85, REPORT_ID_MOUSE,         //   REPORT_ID (2)
+   0x85, 0x02,		              //   REPORT_ID (2)
    0x09, 0x01,                    //   USAGE (Pointer)
    0xA1, 0x00,                    //   COLLECTION (Physical)
    0x05, 0x09,                    //     USAGE_PAGE (Button)
@@ -85,7 +104,6 @@ static uint8_t keyboard_mouse_report_map_data[] = {
    0xC0,                          //   END_COLLECTION
    0xC0,                     	  // END COLLECTION   
 };
-*/
 
 static uint8_t report_map_data[] =
 {
@@ -221,26 +239,35 @@ void hid_init(void){
     static ble_hids_inp_rep_init_t  input_report_array[1];
     static ble_hids_outp_rep_init_t output_report_array[1];
 	
-    memset((void *)input_report_array, 0, sizeof(ble_hids_inp_rep_init_t));
-    memset((void *)output_report_array, 0, sizeof(ble_hids_outp_rep_init_t));
+    memset((void *)input_report_array, 0, sizeof(input_report_array));
+    memset((void *)output_report_array, 0, sizeof(input_report_array));
 
     // Initialize HID Service
-    p_input_report                      = &input_report_array[INPUT_REPORT_KEYS_INDEX];
-    p_input_report->max_len             = INPUT_REPORT_KEYS_MAX_LEN;
-    p_input_report->rep_ref.report_id   = INPUT_REP_REF_ID;
+    p_input_report                      = &input_report_array[0];
+    p_input_report->max_len             = 8;
+    p_input_report->rep_ref.report_id   = 0;
     p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
 
-    p_output_report                      = &output_report_array[OUTPUT_REPORT_INDEX];
-    p_output_report->max_len             = OUTPUT_REPORT_MAX_LEN;
-    p_output_report->rep_ref.report_id   = OUTPUT_REP_REF_ID;
+    p_output_report                      = &output_report_array[0];
+    p_output_report->max_len             = 1;
+    p_output_report->rep_ref.report_id   = 0;
     p_output_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_OUTPUT;
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.write_perm);
+
+	//p_input_report                      = &input_report_array[1];
+    //p_input_report->max_len             = 4;
+    //p_input_report->rep_ref.report_id   = 2;
+    //p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
+	//
+    //BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
+    //BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
+    //BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
 
     hid_info_flags = HID_INFO_FLAG_REMOTE_WAKE_MSK | HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK;
 
@@ -269,8 +296,7 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.hid_information.security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.hid_information.security_mode.write_perm);
 
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(
-        &hids_init_obj.security_mode_boot_kb_inp_rep.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_inp_rep.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_inp_rep.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.security_mode_boot_kb_inp_rep.write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_kb_outp_rep.read_perm);
@@ -280,6 +306,10 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_protocol.write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hids_init_obj.security_mode_ctrl_point.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_ctrl_point.write_perm);
+
+	//BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.cccd_write_perm);
+    //BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.read_perm);
+    //BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_boot_mouse_inp_rep.write_perm);
 
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
     APP_ERROR_CHECK(err_code);
