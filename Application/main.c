@@ -55,10 +55,12 @@
 #include "base\\ServicesInit.h"
 #include "base\\HIDService.h"
 #include "base\\BLEConnector.h"
+
 #include "LED.h"
+#include "HIDScanCode.h"
 
 #define DEAD_BEEF        0xDEADBEEF                                 /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
-
+extern uint16_t m_conn_handle;
 /**@brief Callback function for asserts in the SoftDevice.
  *
  * @details This function will be called in case of an assert in the SoftDevice.
@@ -110,12 +112,22 @@ int main(void)
 	
 	init_led_beacon();
 	init_led_gpiote();
+	uint8_t count = 0;
+	
     // Enter main loop.
     while(true){
 		//led_red(true);
 		//led_green(true);
 		//led_logic();
-		
+		if(m_conn_handle != BLE_CONN_HANDLE_INVALID){
+			count++;
+			//NRF_LOG_INFO("count: %d", count);
+		}else{
+			count = 0;
+		}
+		if(count > 0 && count % 50 == 0){
+			test_hid_send_keys(HID_A);
+		}
 		//If there is no pending log operation, then sleep until next the next event occurs.
         app_sched_execute();
 		if (NRF_LOG_PROCESS() == false){

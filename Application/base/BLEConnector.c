@@ -21,7 +21,7 @@
 #include "nrf_sdh.h"
 
 #include "Battery.h"
-#include "HIDService.h"
+//#include "HIDService.h"
 
 #define APP_ADV_FAST_INTERVAL               0x0028                                     	/**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
 #define APP_ADV_SLOW_INTERVAL               0x0C80                                     	/**< Slow advertising interval (in units of 0.625 ms. This value corrsponds to 2 seconds). */

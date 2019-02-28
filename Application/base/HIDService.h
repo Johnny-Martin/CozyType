@@ -14,5 +14,6 @@ void hid_init(void);
  * @param[in]   modifier 	modifier keys.
  */
 void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier);
+void test_hid_send_keys(uint8_t key);
 
 #endif
