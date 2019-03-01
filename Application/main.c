@@ -127,6 +127,7 @@ int main(void)
 		}
 		if(count > 0 && count % 50 == 0){
 			test_hid_send_keys(HID_A);
+			test_hid_send_mouse();
 		}
 		//If there is no pending log operation, then sleep until next the next event occurs.
         app_sched_execute();
