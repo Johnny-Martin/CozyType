@@ -416,6 +416,11 @@
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
             </File>
+            <File>
+              <FileName>Matrix.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Matrix.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4753,6 +4758,11 @@
               <FileName>LED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\LED.c</FilePath>
+            </File>
+            <File>
+              <FileName>Matrix.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\Matrix.c</FilePath>
             </File>
           </Files>
         </Group>
