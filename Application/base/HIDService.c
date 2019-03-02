@@ -63,6 +63,7 @@ static uint8_t report_map_data[] = {
 	0xB1, 0x02,       //   Feature (Data, Variable, Absolute)
 	0xc0,             // END_COLLECTION
 	
+	0x05, 0x01,       // USAGE_PAGE (Generic Desktop)
 	0x09, 0x02,       // USAGE (Mouse)
 	0xa1, 0x01,       // COLLECTION (Application)
 	0x85, 0x02,		  //   REPORT_ID (2)
@@ -256,6 +257,7 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hids_init_obj.security_mode_ctrl_point.write_perm);
 
     err_code = ble_hids_init(&m_hids, &hids_init_obj);
+	NRF_LOG_INFO("ble_hids_init ret: %d", err_code);
     APP_ERROR_CHECK(err_code);
 }
 
