@@ -341,11 +341,11 @@ void send_mouse_moving(int16_t x_delta, int16_t y_delta){
 	handle_hid_error(err_code);
 }
 
-void send_mouse_btns(bool left_btn, bool middle_btn, bool right_btn){
+void send_mouse_btns(bool left_btn, bool right_btn, bool middle_btn){
 	uint8_t state = 0x00;
 	state = left_btn   ? (state + 0x01) : state;
-	state = middle_btn ? (state + 0x02) : state;
-	state = right_btn  ? (state + 0x04) : state;
+	state = right_btn  ? (state + 0x02) : state;
+	state = middle_btn ? (state + 0x04) : state;
 	
 	ret_code_t err_code;
 
@@ -374,14 +374,33 @@ void send_mouse_scroll(int8_t scroll, int8_t ac_pan){
 
 void test_hid_send_keys(uint8_t key){
 	NRF_LOG_INFO("send key begin");
-	send_keys(&key, 1, 0x00);
-	send_keys(NULL, 0, 0x00);
+	//send_keys(&key, 1, 0x00);
+	//send_keys(NULL, 0, 0x00);
 	NRF_LOG_INFO("send key end");
 }
 
 void test_hid_send_mouse(void){
+	static uint8_t flag = 1;
+	
 	NRF_LOG_INFO("send mouse begin");
-	send_mouse_btns(false, false, true);
-	send_mouse_btns(false, false, false);
+	if(flag % 7 == 1){
+		send_mouse_btns(true, false, false);
+		send_mouse_btns(false, false, false);
+	}else if(flag % 7 == 2){
+		send_mouse_btns(false, true, false);
+		send_mouse_btns(false, false, false);
+	}else if(flag % 7 == 3){
+		send_mouse_btns(false, false, true);
+		send_mouse_btns(false, false, false);
+	}else if(flag % 7 == 4){
+		send_mouse_moving(10, 10);
+	}else if(flag % 7 == 5){
+		send_mouse_moving(-10, -10);
+	}else if(flag % 7 == 6){
+		send_mouse_scroll(10, 10);
+	}else if(flag % 7 == 0){
+		send_mouse_scroll(-10, -10);
+	}
+	flag++;
 	NRF_LOG_INFO("send mouse end");
 }
