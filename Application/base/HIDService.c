@@ -14,8 +14,8 @@ extern uint16_t 			m_conn_handle;												/**< Handle of the current connecti
 BLE_HIDS_DEF(m_hids,                                                					/**< Structure used to identify the HID service. */
              NRF_SDH_BLE_TOTAL_LINK_COUNT,
              INPUT_REPORT_KEYS_MAX_LEN,
-             OUTPUT_REPORT_MAX_LEN, 
-			 4);
+             OUTPUT_REPORT_MAX_LEN
+			 ,3,3);
 
 static uint8_t report_map_data[] = {
 	0x05, 0x01,       // USAGE_PAGE (Generic Desktop)
@@ -63,37 +63,52 @@ static uint8_t report_map_data[] = {
 	0xB1, 0x02,       //   Feature (Data, Variable, Absolute)
 	0xc0,             // END_COLLECTION
 	
-	0x05, 0x01,       // USAGE_PAGE (Generic Desktop)
-	0x09, 0x02,       // USAGE (Mouse)
-	0xa1, 0x01,       // COLLECTION (Application)
-	0x85, 0x02,		  //   REPORT_ID (2)
-	0x09, 0x01,       //   USAGE (Pointer)
-	0xA1, 0x00,       //   COLLECTION (Physical)
-	0x05, 0x09,       //     USAGE_PAGE (Button)
-	0x19, 0x01,       //     USAGE_MINIMUM
-	0x29, 0x03,       //     USAGE_MAXIMUM
-	0x15, 0x00,       //     LOGICAL_MINIMUM (0)
-	0x25, 0x01,       //     LOGICAL_MAXIMUM (1)
-	0x95, 0x03,       //     REPORT_COUNT (3)
-	0x75, 0x01,       //     REPORT_SIZE (1)
-	0x81, 0x02,       //     INPUT (Data,Var,Abs)
+	0x05, 0x01, 	  // Usage Page (Generic Desktop)
+	0x09, 0x02, 	  // Usage (Mouse)
+    0xA1, 0x01, 	  // Collection (Application)
+    0x85, 0x02,       // 	Report Id 2: Mouse buttons + scroll/pan
+    0x09, 0x01,       // 	Usage (Pointer)
+    0xA1, 0x00,       // 	Collection (Physical)
+    0x95, 0x05,       // 		Report Count (5)
+    0x75, 0x01,       // 		Report Size (1)
+    0x05, 0x09,       // 		Usage Page (Buttons)
+    0x19, 0x01,       // 		Usage Minimum (01)
+    0x29, 0x05,       // 		Usage Maximum (05)
+    0x15, 0x00,       // 		Logical Minimum (0)
+    0x25, 0x01,       // 		Logical Maximum (1)
+    0x81, 0x02,       // 		Input (Data, Variable, Absolute)
 	
-	0x95, 0x01,       //     REPORT_COUNT (1)
-	0x75, 0x05,       //     REPORT_SIZE (5)
-	0x81, 0x03,       //     INPUT (Const,Var,Abs)
+    0x95, 0x01,       // 		Report Count (1)
+    0x75, 0x03,       // 		Report Size (3)
+    0x81, 0x01,       // 		Input (Constant) for padding
 	
-	0x05, 0x01,       //     USAGE_PAGE (Generic Desktop)
-	0x09, 0x30,       //     USAGE (X)
-	0x09, 0x31,       //     USAGE (Y)
-	0x09, 0x38,       //     USAGE (Wheel)
-	0x15, 0x81,       //     LOGICAL_MINIMUM (-127)
-	0x25, 0x7F,       //     LOGICAL_MAXIMUM (127)
-	0x95, 0x03,       //     REPORT_COUNT (3)
-	0x75, 0x08,       //     REPORT_SIZE (8)
-	0x81, 0x06,       //     INPUT (Data,Var,Rel)
+    0x75, 0x08,       // 		Report Size (8)
+    0x95, 0x01,       // 		Report Count (1)
+    0x05, 0x01,       // 		Usage Page (Generic Desktop)
+    0x09, 0x38,       // 		Usage (Wheel)
+    0x15, 0x81,       // 		Logical Minimum (-127)
+    0x25, 0x7F,       // 		Logical Maximum (127)
+    0x81, 0x06,       // 		Input (Data, Variable, Relative)
 	
-	0xC0,             //   END_COLLECTION
-	0xC0,             // END COLLECTION   
+    0x05, 0x0C,       // 		Usage Page (Consumer)
+    0x0A, 0x38, 0x02, // 		Usage (AC Pan)
+    0x95, 0x01,       // 		Report Count (1)
+    0x81, 0x06,       // 		Input (Data,Value,Relative,Bit Field)
+    0xC0,             // 	End Collection (Physical)
+	
+    0x85, 0x03,       // 	Report Id 3: Mouse motion
+    0x09, 0x01,       // 	Usage (Pointer)
+    0xA1, 0x00,       // 	Collection (Physical)
+    0x75, 0x0C,       // 		Report Size (12)
+    0x95, 0x02,       // 		Report Count (2)
+    0x05, 0x01,       // 		Usage Page (Generic Desktop)
+    0x09, 0x30,       // 		Usage (X)
+    0x09, 0x31,       // 		Usage (Y)
+    0x16, 0x01, 0xF8, // 		Logical maximum (2047)
+    0x26, 0xFF, 0x07, // 		Logical minimum (-2047)
+    0x81, 0x06,       // 		Input (Data, Variable, Relative)
+    0xC0,             // 	End Collection (Physical)
+    0xC0,             // End Collection (Application)
 };
 
 /**@brief Function for handling the HID Report Characteristic Write event.
@@ -111,7 +126,7 @@ static void on_hid_rep_char_write(ble_hids_evt_t * p_evt){
     uint8_t  report_val;
     uint8_t  report_index = p_evt->params.char_write.char_id.rep_index;
 
-    if (report_index != 1){
+    if (report_index != 0){
 		NRF_LOG_INFO("report_index: %d", report_index);
 		return;
 	}
@@ -181,7 +196,7 @@ void hid_init(void){
     ble_hids_outp_rep_init_t * p_output_report;
     uint8_t                    hid_info_flags;
 
-    static ble_hids_inp_rep_init_t  input_report_array[2];
+    static ble_hids_inp_rep_init_t  input_report_array[3];
     static ble_hids_outp_rep_init_t output_report_array[1];
 	
     memset((void *)input_report_array, 0, sizeof(input_report_array));
@@ -197,22 +212,32 @@ void hid_init(void){
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
 
-    p_output_report                      = &output_report_array[0];
-    p_output_report->max_len             = 1;
-    p_output_report->rep_ref.report_id   = 1;
-    p_output_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_OUTPUT;
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.write_perm);
-
+ 
 	p_input_report                      = &input_report_array[1];
-    p_input_report->max_len             = 4;
+    p_input_report->max_len             = 3;
     p_input_report->rep_ref.report_id   = 2;
     p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
 	
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
+
+	p_input_report                      = &input_report_array[2];
+    p_input_report->max_len             = 3;
+    p_input_report->rep_ref.report_id   = 3;
+    p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
+	
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
+	
+	p_output_report                      = &output_report_array[0];
+    p_output_report->max_len             = 1;
+    p_output_report->rep_ref.report_id   = 1;
+    p_output_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_OUTPUT;
+
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_output_report->security_mode.write_perm);
 
     hid_info_flags = HID_INFO_FLAG_REMOTE_WAKE_MSK | HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK;
 
@@ -222,7 +247,7 @@ void hid_init(void){
     hids_init_obj.error_handler                  = service_error_handler;
     hids_init_obj.is_kb                          = true;
     hids_init_obj.is_mouse                       = true;
-    hids_init_obj.inp_rep_count                  = 2;
+    hids_init_obj.inp_rep_count                  = 3;
     hids_init_obj.p_inp_rep_array                = input_report_array;
     hids_init_obj.outp_rep_count                 = 1;
     hids_init_obj.p_outp_rep_array               = output_report_array;
@@ -293,31 +318,58 @@ void send_keys(uint8_t * p_keys, uint8_t size, uint8_t modifier){
 	handle_hid_error(err_code);
 }
 
-void send_mouse_movement(uint8_t btns, uint8_t x, uint8_t y, uint8_t wheel){
+void send_mouse_moving(int16_t x_delta, int16_t y_delta){
 	ret_code_t err_code;
-    uint8_t  data[4] = {btns, x, y, wheel};
 
-	NRF_LOG_INFO("send_mouse_movement btns: %d, x: %d, y: %d, wheel:%d", btns, x, y, wheel);
+	NRF_LOG_INFO("send_mouse_movement x_delta: %d, y_delta: %d", x_delta, y_delta);
 	if (m_in_boot_mode){
-		err_code = ble_hids_boot_mouse_inp_rep_send(&m_hids, btns, (int8_t)x, (int8_t)y, 0, NULL, m_conn_handle);
+		x_delta = MIN(x_delta, 0x00ff);
+        y_delta = MIN(y_delta, 0x00ff);
+		err_code = ble_hids_boot_mouse_inp_rep_send(&m_hids, 0x00, (int8_t)x_delta, (int8_t)y_delta, 0, NULL, m_conn_handle);
 	}else{
-		err_code = ble_hids_inp_rep_send(&m_hids, 1, 4, data, m_conn_handle);
+		uint8_t data[3];
+		x_delta = MIN(x_delta, 0x0fff);
+        y_delta = MIN(y_delta, 0x0fff);
+
+        data[0] = x_delta & 0x00ff;
+        data[1] = ((y_delta & 0x000f) << 4) | ((x_delta & 0x0f00) >> 8);
+        data[2] = (y_delta & 0x0ff0) >> 4;
+		
+		err_code = ble_hids_inp_rep_send(&m_hids, 2, 3, data, m_conn_handle);
     }
 
 	handle_hid_error(err_code);
 }
 
-void send_mouse_moving(uint8_t x, uint8_t y, uint8_t wheel){
-	send_mouse_movement(0, x, y, wheel);
-}
-
-void send_mouse_btns(bool left_btn, bool right_btn, bool middle_btn){
+void send_mouse_btns(bool left_btn, bool middle_btn, bool right_btn){
 	uint8_t state = 0x00;
 	state = left_btn   ? (state + 0x01) : state;
 	state = middle_btn ? (state + 0x02) : state;
 	state = right_btn  ? (state + 0x04) : state;
 	
-	send_mouse_movement(state, 0, 0, 0);
+	ret_code_t err_code;
+
+	if (m_in_boot_mode){
+		err_code = ble_hids_boot_mouse_inp_rep_send(&m_hids, state, 0, 0, 0, NULL, m_conn_handle);
+	}else{
+		uint8_t data[3] = {state, 0x00, 0x00};
+		err_code = ble_hids_inp_rep_send(&m_hids, 1, 3, data, m_conn_handle);
+    }
+
+	handle_hid_error(err_code);
+}
+
+void send_mouse_scroll(int8_t scroll, int8_t ac_pan){
+	ret_code_t err_code;
+
+	if (m_in_boot_mode){
+		err_code = NRF_SUCCESS;
+	}else{
+		uint8_t data[3] = {0x00, (uint8_t)scroll, (uint8_t)ac_pan};
+		err_code = ble_hids_inp_rep_send(&m_hids, 1, 3, data, m_conn_handle);
+    }
+
+	handle_hid_error(err_code);
 }
 
 void test_hid_send_keys(uint8_t key){
@@ -329,7 +381,7 @@ void test_hid_send_keys(uint8_t key){
 
 void test_hid_send_mouse(void){
 	NRF_LOG_INFO("send mouse begin");
-	send_mouse_btns(false, true, false);
+	send_mouse_btns(false, false, true);
 	send_mouse_btns(false, false, false);
 	NRF_LOG_INFO("send mouse end");
 }

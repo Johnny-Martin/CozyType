@@ -81,7 +81,7 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
  */
 int main(void)
 {
-    bool erase_bonds = false;
+    bool erase_bonds = true;
 
     // Initialize.
     log_init();
