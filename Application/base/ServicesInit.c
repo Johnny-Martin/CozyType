@@ -6,7 +6,6 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-#include "bsp_btn_ble.h"
 #include "nrf_ble_qwr.h"
 
 #include "ble.h"
