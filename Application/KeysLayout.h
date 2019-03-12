@@ -4,7 +4,10 @@
 #include "nrf_gpio.h"
 #include "HIDScanCode.h"
 
-uint32_t Matrix_L[5][8] = {
+#define ROWS_COUNT		5
+#define COLS_COUNT		8
+
+uint32_t Matrix_L[ROWS_COUNT][COLS_COUNT] = {
 	{X_1_F1, 	X_2_F2, 		X_3_F3, 	X_4_F4, 		X_5_F5,			X_6_F6, 		X_7_F7,				X_Fn_L},
 								/* ,< */ 													/* /? */			/* =+ */
 	{HID_Nil, 	HID_Escape, 	HID_Comma,	HID_S, 			HID_M, 			HID_K, 			HID_Slash, 			HID_Equal},
@@ -15,7 +18,7 @@ uint32_t Matrix_L[5][8] = {
 	{HID_Nil,	HID_Nil,		HID_Nil,	HID_Nil,		HID_Left_Alt,	HID_Backspace,	HID_Left_Control,	HID_Left_Shift}
 };
 
-uint32_t Matrix_R[5][8] = {
+uint32_t Matrix_R[ROWS_COUNT][COLS_COUNT] = {
 															/* () + [] */   /* "" + '' */		/* {} + <> */	/* ;: */		
 	{X_Fn_R,  	X_8_F8, 		X_9_F9, 	X_0_F10,		X_Brackets, 	X_DoubleQuotes, 	X_Braces, 		HID_Semicolon},
 	/* -_ */	/* \| */
