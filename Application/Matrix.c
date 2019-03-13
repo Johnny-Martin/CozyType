@@ -132,7 +132,7 @@ void matrix_init(void){
 	for(uint8_t i=0; i<COLS_COUNT; i++)
 		nrf_gpio_cfg_input(m_pin_col[i], NRF_GPIO_PIN_PULLDOWN);
 	
-	m_layout_matrix = isRightHand() ? Matrix_R : Matrix_L;
+	m_layout_matrix = is_left_hand() ? Matrix_L : Matrix_R;
 }
 
 
