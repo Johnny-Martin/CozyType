@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "nrf_gpio.h"
+#include "nrf_log.h"
 #include "base\\HIDService.h"
 #include "KeysLayout.h"
 #include "BoardConfig.h"
@@ -107,15 +108,20 @@ void scan_keys_and_report(void){
 		read_all_columns(i);
 	}
 
+	NRF_LOG_INFO("m_modifiler: %d", m_modifiler)
+	for(uint8_t i=0; i< m_keys_count; i++){
+		NRF_LOG_INFO("scan_keys_and_report: %d", m_keys[i]);
+	}
+	
 	if(last_round_keys_count == m_keys_count && last_round_modifiler == m_modifiler){
 		for(uint8_t i=0; i< m_keys_count; i++){
 			if(last_round_keys[i] != m_keys[i]){
-				send_keys(m_keys, m_keys_count, m_modifiler);
+				//send_keys(m_keys, m_keys_count, m_modifiler);
 				return;
 			}
 		}
 	}else{
-		send_keys(m_keys, m_keys_count, m_modifiler);
+		//send_keys(m_keys, m_keys_count, m_modifiler);
 	}
 }
 
