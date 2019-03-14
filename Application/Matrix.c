@@ -87,9 +87,16 @@ static void read_all_columns(uint8_t cur_row_idx){
 	for(uint8_t i=0; i<COLS_COUNT; i++){
 		if(m_keys_count == MAX_KEYS)
 			break;
-		if(nrf_gpio_pin_read(m_pin_col[i]) != 0)
+		if(nrf_gpio_pin_read(m_pin_col[i]) != 0){
 			push_composite_key(m_layout_matrix[cur_row_idx][i]);
+			//NRF_LOG_INFO("matrix pos: (%d,%d)", cur_row_idx, i);
+		}
 	}
+}
+
+static void print_keys(uint8_t * p_keys, uint8_t modifier){
+	NRF_LOG_INFO("print_keys, modifier: %d", modifier)
+	NRF_LOG_INFO("print_keys, scan_keys_and_report: %d, %d, %d, %d, %d, %d", p_keys[0], p_keys[1], p_keys[2], p_keys[3], p_keys[4], p_keys[5])
 }
 
 void scan_keys_and_report(void){
@@ -107,21 +114,18 @@ void scan_keys_and_report(void){
 		set_row(i);
 		read_all_columns(i);
 	}
-
-	NRF_LOG_INFO("m_modifiler: %d", m_modifiler)
-	for(uint8_t i=0; i< m_keys_count; i++){
-		NRF_LOG_INFO("scan_keys_and_report: %d", m_keys[i]);
-	}
 	
 	if(last_round_keys_count == m_keys_count && last_round_modifiler == m_modifiler){
 		for(uint8_t i=0; i< m_keys_count; i++){
 			if(last_round_keys[i] != m_keys[i]){
-				//send_keys(m_keys, m_keys_count, m_modifiler);
+				send_keys(m_keys, m_keys_count, m_modifiler);
+				print_keys(m_keys, m_modifiler);
 				return;
 			}
 		}
 	}else{
-		//send_keys(m_keys, m_keys_count, m_modifiler);
+		send_keys(m_keys, m_keys_count, m_modifiler);
+		print_keys(m_keys, m_modifiler);
 	}
 }
 
@@ -133,6 +137,12 @@ void matrix_init(void){
 		nrf_gpio_cfg_input(m_pin_col[i], NRF_GPIO_PIN_PULLDOWN);
 	
 	m_layout_matrix = is_left_hand() ? Matrix_L : Matrix_R;
+	
+	if(is_left_hand()){
+		NRF_LOG_INFO("is left hand");
+	}else{
+		NRF_LOG_INFO("is right hand");
+	}
 }
 
 
