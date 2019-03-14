@@ -421,6 +421,16 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Matrix.c</FilePath>
             </File>
+            <File>
+              <FileName>TrackPoint.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\TrackPoint.c</FilePath>
+            </File>
+            <File>
+              <FileName>ThumbWheel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ThumbWheel.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2126,6 +2136,11 @@
               <FileType>1</FileType>
               <FilePath>..\SDK\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
+            <File>
+              <FileName>nrfx_qdec.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\modules\nrfx\drivers\src\nrfx_qdec.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3474,6 +3489,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>app_gpiote.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\components\libraries\gpiote\app_gpiote.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4586,6 +4606,16 @@
               <FileType>1</FileType>
               <FilePath>..\Application\Matrix.c</FilePath>
             </File>
+            <File>
+              <FileName>TrackPoint.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\TrackPoint.c</FilePath>
+            </File>
+            <File>
+              <FileName>ThumbWheel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\ThumbWheel.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -6291,6 +6321,11 @@
               <FileType>1</FileType>
               <FilePath>..\SDK\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
+            <File>
+              <FileName>nrfx_qdec.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\modules\nrfx\drivers\src\nrfx_qdec.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -7639,6 +7674,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>app_gpiote.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SDK\components\libraries\gpiote\app_gpiote.c</FilePath>
             </File>
           </Files>
         </Group>

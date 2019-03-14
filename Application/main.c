@@ -77,7 +77,7 @@ static void init(void){
     peer_manager_init();
 
 	ppi_init();
-	
+	gpiote_handler_init();
 	//init_led_beacon();
 	//init_led_gpiote();
 	

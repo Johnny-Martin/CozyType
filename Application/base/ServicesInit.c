@@ -21,6 +21,7 @@
 
 #include "peer_manager.h"
 #include "nrf_drv_gpiote.h"
+#include "app_gpiote.h"
 #include "nrf_drv_ppi.h"
 #include "nrfx_ppi.h"
 
@@ -81,6 +82,10 @@ void timers_init(void)
 void gpiote_init(void)
 {
     APP_ERROR_CHECK(nrf_drv_gpiote_init());
+}
+
+void gpiote_handler_init(void){
+	APP_GPIOTE_INIT(3);
 }
 
 /**@brief Function for the PPI initialization.

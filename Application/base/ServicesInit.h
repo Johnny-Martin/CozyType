@@ -22,6 +22,8 @@ void timers_init(void);
  */
 void gpiote_init(void);
 
+void gpiote_handler_init(void);
+
 /**@brief Function for the PPI initialization.
  *
  * @details Initializes the PPI module. 
