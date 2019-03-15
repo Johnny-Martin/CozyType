@@ -8,7 +8,7 @@
 #define COLS_COUNT		8
 
 uint32_t Matrix_L[ROWS_COUNT][COLS_COUNT] = {
-	{X_1_F1, 	X_2_F2, 		X_3_F3, 	X_4_F4, 		X_5_F5,			X_6_F6, 		X_7_F7,				X_Fn_L},
+	{X_1_F1, 	X_2_F2, 		X_3_F3, 	X_4_F4, 		X_5_F5,			X_6_F6, 		X_7_F7,				X_Fn},
 								/* ,< */ 													/* /? */			/* =+ */
 	{HID_Nil, 	HID_Escape, 	HID_Comma,	HID_S, 			HID_M, 			HID_K, 			HID_Slash, 			HID_Equal},
 																												/* `~ */
@@ -20,7 +20,7 @@ uint32_t Matrix_L[ROWS_COUNT][COLS_COUNT] = {
 
 uint32_t Matrix_R[ROWS_COUNT][COLS_COUNT] = {
 															/* () + [] */   /* "" + '' */		/* {} + <> */	/* ;: */		
-	{X_Fn_R,  	X_8_F8, 		X_9_F9, 	X_0_F10,		X_Brackets, 	X_DoubleQuotes, 	X_Braces, 		HID_Semicolon},
+	{X_Fn,  	X_8_F8, 		X_9_F9, 	X_0_F10,		X_Brackets, 	X_DoubleQuotes, 	X_Braces, 		HID_Semicolon},
 	/* -_ */	/* \| */
 	{HID_Minus, HID_Backslash, 	HID_C, 		HID_B, 			HID_D, 			HID_O, 			HID_Left_Win,		HID_Nil},
 	{HID_F11,	HID_F, 			HID_W, 		HID_E, 			HID_I, 			HID_U, 			HID_G, 				X_Ctrl_S},

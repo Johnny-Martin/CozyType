@@ -4,8 +4,7 @@
 #define HID_Nil							0x00
 #define HID_Reserved					0x00
 //special key
-#define X_Fn_L							0xFF00
-#define X_Fn_R							0xFF01
+#define X_Fn							0xFFFF01
 
 #define X_Brackets						0x26272F30 //() + []
 #define X_DoubleQuotes					0x34343434 //"" + ''
