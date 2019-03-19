@@ -25,10 +25,11 @@ static void qedc_event_handler(nrf_drv_qdec_event_t event)
     static int sample = 0;
  
 	if (event.type == NRF_QDEC_EVENT_REPORTRDY){
-       NRF_LOG_INFO("report");
+       NRF_LOG_INFO("report ready");
     }
 	if (event.type == NRF_QDEC_EVENT_SAMPLERDY){
 		sample++;
+		NRF_LOG_INFO("sample ready");
     }
 }
 

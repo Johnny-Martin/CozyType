@@ -14,6 +14,7 @@
 #include "LED.h"
 #include "HIDScanCode.h"
 #include "Matrix.h"
+#include "TrackPoint.h"
 
 #define DEAD_BEEF        					0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MULITIPURPOSE_TIMER_INTERVAL        APP_TIMER_TICKS(50)                      	/**< Battery level measurement interval (ticks). */
@@ -84,6 +85,7 @@ static void init(void){
 	create_battery_timer();
 	create_multipurpose_timer();
 	matrix_init();
+	trackpoint_init();
 }
 
 /**@brief Function for application main entry.
