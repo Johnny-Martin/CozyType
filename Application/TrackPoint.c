@@ -5,21 +5,24 @@
 #include "app_timer.h"
 #include "nrf_drv_gpiote.h"
 
-#define TP_RST			NRF_GPIO_PIN_MAP(0,14)
-#define TP_CLK			NRF_GPIO_PIN_MAP(0,16)
-#define TP_DTA			NRF_GPIO_PIN_MAP(0,13)
+#define TP_RST_PIN									NRF_GPIO_PIN_MAP(0,14)
+#define TP_CLK_PIN									NRF_GPIO_PIN_MAP(0,16)
+#define TP_DTA_PIN									NRF_GPIO_PIN_MAP(0,13)
 
-#define DELAY_TIMER_INTERVAL APP_TIMER_TICKS(10)
+#define DELAY_TIMER_INTERVAL 						APP_TIMER_TICKS(10)
+#define STATE_READY 								0
+#define STATE_H_TO_L 								1
+#define STATE_L_TO_H 								2
 
 APP_TIMER_DEF(m_delay_timer_id); 
 static app_gpiote_user_id_t   m_gpiote_user_id;
 static uint32_t  p028_bitmask = 0x10000000; // Bitmask to be notified of transition from low to high for GPIO 0-3
 static uint32_t  p014_bitmask = 0x00004000; // Bitmask to be notified of transition from low to high for GPIO 0-3
-static bool is_high_to_low;
+static uint8_t m_state;
 
-static void start_delay_timer(){
+static void start_delay_timer(void* pData){
 	uint32_t err_code;
-	err_code = app_timer_start(m_delay_timer_id, DELAY_TIMER_INTERVAL, NULL);
+	err_code = app_timer_start(m_delay_timer_id, DELAY_TIMER_INTERVAL, pData);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -31,26 +34,32 @@ static void gpiote_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t
 	}
 	
 	if(nrf_drv_gpiote_in_is_set(pin)){
-		start_delay_timer();
-		NRF_LOG_INFO("gpiote_event_handler p028 low_to_high");
-	}else{
-		start_delay_timer();
-		NRF_LOG_INFO("gpiote_event_handler p028 high_to_low");
+		m_state = STATE_L_TO_H;
+		start_delay_timer((void*)pin);
 	}
 }
 
+static void on_low_to_high(void){
+	
+}
+
 static void delay_timeout_handler(void * p_context){
-	NRF_LOG_INFO("app_gpiote_pins_state_get");
+	nrf_drv_gpiote_pin_t pin = (nrf_drv_gpiote_pin_t)p_context;
+	bool is_high = nrf_drv_gpiote_in_is_set(pin);
+	if(is_high && m_state == STATE_L_TO_H){
+		NRF_LOG_INFO("QQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
+	}
+	m_state = STATE_READY;
 }
 
 void trackpoint_init(void){
 	uint32_t err_code;
-	nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
-	err_code = nrf_drv_gpiote_in_init(NRF_GPIO_PIN_MAP(0,14), &config, gpiote_event_handler);
+	nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
+	err_code = nrf_drv_gpiote_in_init(TP_CLK_PIN, &config, gpiote_event_handler);
     APP_ERROR_CHECK(err_code);
 	
 	err_code = app_timer_create(&m_delay_timer_id, APP_TIMER_MODE_SINGLE_SHOT, delay_timeout_handler);
     APP_ERROR_CHECK(err_code);
 	
-	nrf_drv_gpiote_in_event_enable(NRF_GPIO_PIN_MAP(0,14), true);
+	nrf_drv_gpiote_in_event_enable(TP_CLK_PIN, true);
 }
