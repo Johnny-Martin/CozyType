@@ -15,9 +15,6 @@
 #define STATE_L_TO_H 								2
 
 APP_TIMER_DEF(m_delay_timer_id); 
-static app_gpiote_user_id_t   m_gpiote_user_id;
-static uint32_t  p028_bitmask = 0x10000000; // Bitmask to be notified of transition from low to high for GPIO 0-3
-static uint32_t  p014_bitmask = 0x00004000; // Bitmask to be notified of transition from low to high for GPIO 0-3
 static uint8_t m_state;
 
 static void start_delay_timer(void* pData){
@@ -40,14 +37,14 @@ static void gpiote_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t
 }
 
 static void on_low_to_high(void){
-	
+	NRF_LOG_INFO("QQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
 }
 
 static void delay_timeout_handler(void * p_context){
 	nrf_drv_gpiote_pin_t pin = (nrf_drv_gpiote_pin_t)p_context;
 	bool is_high = nrf_drv_gpiote_in_is_set(pin);
 	if(is_high && m_state == STATE_L_TO_H){
-		NRF_LOG_INFO("QQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
+		on_low_to_high();
 	}
 	m_state = STATE_READY;
 }
