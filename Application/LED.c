@@ -9,24 +9,15 @@
 #define RGB_LED_B 	NRF_GPIO_PIN_MAP(0,24)
 #define RGB_LED_C 	NRF_GPIO_PIN_MAP(1,0)
 
-#define INPUT_PIN1	NRF_GPIO_PIN_MAP(0,28)
-#define INPUT_PIN2	NRF_GPIO_PIN_MAP(0,30)
-#define INPUT_PIN3	NRF_GPIO_PIN_MAP(0,14)
-
-//static uint32_t 	m_begin_color;
-//static uint32_t 	m_end_color;
-//static uint32_t 	m_interval;
-//static uint32_t 	m_repetitions;
 static uint32_t		m_red_pin;
 static uint32_t		m_green_pin;
 static uint32_t		m_blue_pin;
+static led_state_t  m_led_state;
+static uint32_t		m_timer_count;
 
-static nrf_ppi_channel_t ppi_channel_led;
-
-void init_led_beacon(){
+void init_led(){
 	//init the led GPIO
-	//isRightHand()
-	if(true){
+	if(is_left_hand()){
 		m_red_pin 	= RGB_LED_A;
 		m_blue_pin	= RGB_LED_B;
 		m_green_pin	= RGB_LED_C;
@@ -37,99 +28,59 @@ void init_led_beacon(){
 	}
 	
 	//PWM mode
-	//nrf_gpio_cfg_output(m_red_pin);
-	//nrf_gpio_cfg_output(m_green_pin);
-	//nrf_gpio_cfg_output(m_blue_pin);
-	//nrf_gpio_cfg_input(INPUT_PIN1, NRF_GPIO_PIN_PULLUP);
-	//nrf_gpio_cfg_input(INPUT_PIN2, NRF_GPIO_PIN_PULLUP);
-	//nrf_gpio_cfg_input(INPUT_PIN3, NRF_GPIO_PIN_PULLUP);
-}
-/**@brief test the PCB board with GPIOTE.
- * @details the signal on INPUT_PIN1 controls the red LED light on and off.
- */
-void init_led_gpiote(void){
-	int32_t err_code = NRF_SUCCESS;
-	//toggle the led pin while the input event occurs.
-	nrf_drv_gpiote_out_config_t led_config=GPIOTE_CONFIG_OUT_TASK_TOGGLE(true);
-    err_code=nrf_drv_gpiote_out_init(m_red_pin, &led_config);
-    APP_ERROR_CHECK(err_code);
-    nrf_drv_gpiote_out_task_enable(m_red_pin);
-    
-	//set the input pin
-	nrf_drv_gpiote_in_config_t input_config=GPIOTE_CONFIG_IN_SENSE_HITOLO(true);
-    input_config.pull=NRF_GPIO_PIN_PULLUP;
-    err_code=nrf_drv_gpiote_in_init(INPUT_PIN1,&input_config,NULL);
-    APP_ERROR_CHECK(err_code);
-    nrf_drv_gpiote_in_event_enable(INPUT_PIN1,true);
-
-	
-	//allocate PPI channel for led
-	err_code=nrf_drv_ppi_channel_alloc(&ppi_channel_led);
-	
-	//connect input pin with output pin
-	err_code=nrf_drv_ppi_channel_assign(ppi_channel_led,
-                               nrf_drv_gpiote_in_event_addr_get(INPUT_PIN1),
-                               nrf_drv_gpiote_out_task_addr_get(m_red_pin));
-    APP_ERROR_CHECK(err_code);
-    err_code=nrf_drv_ppi_channel_enable(ppi_channel_led);
-    APP_ERROR_CHECK(err_code);
-	
+	nrf_gpio_cfg_output(m_red_pin);
+	nrf_gpio_cfg_output(m_green_pin);
+	nrf_gpio_cfg_output(m_blue_pin);
 }
 
-void start_blinking(uint32_t _beginColor, uint32_t _endColor, uint32_t _interval, uint32_t _repetitions){
-	//m_begin_color = _beginColor;
-	//m_end_color	 	= _endColor;
-	//m_interval		= _interval;
-	//m_repetitions	= _repetitions;
-	
-	blinking();
+void set_led_state(led_state_t state){
+	m_led_state = state;
 }
 
-void blinking(){
-	
-}
-
-/**@brief test PCB board
- *
- */
-void led_red(bool on){
-	if(on){
-		nrf_gpio_pin_set(m_red_pin);
-	}else{
+static void reset_led(uint8_t red, uint8_t green, uint8_t blue){
+	if(red == 0){
 		nrf_gpio_pin_clear(m_red_pin);
-	}
-}
-
-void led_green(bool on){
-	if(on){
-		nrf_gpio_pin_set(m_green_pin);
 	}else{
+		nrf_gpio_pin_set(m_red_pin);
+	}
+	if(green == 0){
 		nrf_gpio_pin_clear(m_green_pin);
-	}
-}
-
-void led_blue(bool on){
-	if(on){
-		nrf_gpio_pin_set(m_blue_pin);
 	}else{
+		nrf_gpio_pin_set(m_green_pin);
+	}
+	if(blue == 0){
 		nrf_gpio_pin_clear(m_blue_pin);
+	}else{
+		nrf_gpio_pin_set(m_blue_pin);
 	}
 }
 
-void led_logic(void){
-	if(nrf_gpio_pin_read(INPUT_PIN1) == 0){
-		led_red(true);
-	}else{
-		led_red(false);
+static void led_on(void){
+	uint8_t red 	= 0;
+	uint8_t green 	= 0;
+	uint8_t blue 	= 0;
+	switch (m_led_state){
+		case LED_ADV:
+			green = 1;
+			break;
+		case LED_LOW_BATTERY:
+			red = 1;
+			break;
 	}
-	if(nrf_gpio_pin_read(INPUT_PIN2) == 0){
-		led_green(true);
-	}else{
-		led_green(false);
+	
+	reset_led(red, green, blue);
+}
+
+//called in multipurpose_timer
+void led_loop(void){
+	m_timer_count++;
+	if(m_timer_count % 10 != 0){
+		return;
 	}
-	if(nrf_gpio_pin_read(INPUT_PIN3) == 0){
-		led_blue(true);
+	
+	if(m_timer_count % 20 == 0){
+		reset_led(0,0,0);
 	}else{
-		led_blue(false);
+		led_on();
 	}
 }

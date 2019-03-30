@@ -5,13 +5,15 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-void				init_led_beacon(void);
-void 				start_blinking(uint32_t _beginColor, uint32_t _endColor, uint32_t _interval, uint32_t _repetitions);
-void				blinking(void);	
-void 				led_red(bool on);
-void 				led_green(bool on);
-void 				led_blue(bool on);
-void 				led_logic(void);
-void 				init_led_gpiote(void);
+typedef enum{
+	LED_OFF = 0,
+	LED_ADV,
+	LED_FAST_ADV,
+	LED_SLOW_ADV,
+	LED_LOW_BATTERY
+}led_state_t;
 
+void				init_led(void);
+void				set_led_state(led_state_t state);
+void 				led_loop(void);
 #endif
