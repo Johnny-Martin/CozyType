@@ -1,4 +1,6 @@
 #include "JoyStick.h"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
 
 #define STICK_BTN_1			NRF_GPIO_PIN_MAP(0,14)
 #define STICK_BTN_2			NRF_GPIO_PIN_MAP(0,16)
@@ -21,20 +23,20 @@
 //used for trackpoint module's Rst,Clk and Data.
 
 void joystick_init(void){
-	nrf_gpio_cfg_input(STICK_BTN_1, NRF_GPIO_PIN_PULLDWON);
-	nrf_gpio_cfg_input(STICK_BTN_2, NRF_GPIO_PIN_PULLDWON);
-	nrf_gpio_cfg_input(STICK_BTN_3, NRF_GPIO_PIN_PULLDWON);
-	nrf_gpio_cfg_input(STICK_BTN_4, NRF_GPIO_PIN_PULLDWON);
-	nrf_gpio_cfg_input(STICK_BTN_5, NRF_GPIO_PIN_PULLDWON);
+	nrf_gpio_cfg_input(STICK_BTN_1, NRF_GPIO_PIN_PULLDOWN);
+	nrf_gpio_cfg_input(STICK_BTN_2, NRF_GPIO_PIN_PULLDOWN);
+	nrf_gpio_cfg_input(STICK_BTN_3, NRF_GPIO_PIN_PULLDOWN);
+	nrf_gpio_cfg_input(STICK_BTN_4, NRF_GPIO_PIN_PULLDOWN);
+	nrf_gpio_cfg_input(STICK_BTN_5, NRF_GPIO_PIN_PULLDOWN);
 }
 
 #define TEST(btn) 								\
 do{												\
 	uint32_t state = nrf_gpio_pin_read(btn);	\
 	if(state != 0){								\
-		NRF_LOG_INFO(##btn); 					\
+		NRF_LOG_INFO(#btn); 					\
 	}											\
-}while(0)
+}while(0);
 
 void scan_joystick_and_report(void){
 	TEST(STICK_BTN_1)

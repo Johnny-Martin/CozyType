@@ -15,7 +15,7 @@ static uint32_t		m_blue_pin;
 static led_state_t  m_led_state;
 static uint32_t		m_timer_count;
 
-void init_led(){
+void led_init(){
 	//init the led GPIO
 	if(is_left_hand()){
 		m_red_pin 	= RGB_LED_A;

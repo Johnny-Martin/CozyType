@@ -62,8 +62,8 @@ void thumb_wheel_init(void){
  
 	nrf_drv_qdec_enable();
 	
-	nrf_gpio_cfg_input(THUMB_BTN_L, NRF_GPIO_PIN_PULLDWON);
-	nrf_gpio_cfg_input(THUMB_BTN_R, NRF_GPIO_PIN_PULLDWON);
+	nrf_gpio_cfg_input(THUMB_BTN_L, NRF_GPIO_PIN_PULLDOWN);
+	nrf_gpio_cfg_input(THUMB_BTN_R, NRF_GPIO_PIN_PULLDOWN);
 	
 	thumbWheelBehaviorConfig = getThumbWheelBehaviorConfig();
 }

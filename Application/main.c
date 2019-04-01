@@ -15,6 +15,9 @@
 #include "HIDScanCode.h"
 #include "Matrix.h"
 #include "TrackPoint.h"
+#include "ThumbWheel.h"
+#include "JoyStick.h"
+#include "PIRSensor.h"
 
 #define DEAD_BEEF        					0xDEADBEEF                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MULITIPURPOSE_TIMER_INTERVAL        APP_TIMER_TICKS(50)                      	/**< Battery level measurement interval (ticks). */
@@ -50,9 +53,9 @@ static void multipurpose_timeout_handler(void * p_context){
 	
 	//--todo test
 	led_loop();
-	scan_thumb_wheels_and_report();
+	scan_thumb_btns_and_report();
 	scan_joystick_and_report();
-	// check_pir_sensor_and_report();
+	check_pir_sensor_and_report();
 }
 
 static void create_multipurpose_timer(void){
@@ -82,13 +85,15 @@ static void init(void){
 
 	ppi_init();
 	gpiote_handler_init();
-	//init_led_beacon();
-	//init_led_gpiote();
 	
+	led_init();
 	create_battery_timer();
 	create_multipurpose_timer();
 	matrix_init();
 	trackpoint_init();
+	thumb_wheel_init();
+	joystick_init();
+	pir_init();
 }
 
 /**@brief Function for application main entry.

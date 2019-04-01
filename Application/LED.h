@@ -13,7 +13,7 @@ typedef enum{
 	LED_LOW_BATTERY
 }led_state_t;
 
-void				init_led(void);
+void				led_init(void);
 void				set_led_state(led_state_t state);
 void 				led_loop(void);
 #endif
