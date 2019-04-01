@@ -47,10 +47,12 @@ static void start_multipurpose_timer(void){
 static void multipurpose_timeout_handler(void * p_context){
 	UNUSED_PARAMETER(p_context);
 	scan_keys_and_report();
+	
+	//--todo test
 	led_loop();
-	// scan_thumb_wheels_and_report();
-	// scan_joystick_and_report();
-	// check_ir_sensor_and_report();
+	scan_thumb_wheels_and_report();
+	scan_joystick_and_report();
+	// check_pir_sensor_and_report();
 }
 
 static void create_multipurpose_timer(void){

@@ -5,5 +5,6 @@
 #include "BoardConfig.h"
 
 void thumb_wheel_init(void);
+void scan_thumb_btns_and_report(void);
 
 #endif
